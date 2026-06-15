@@ -44,3 +44,5 @@
 - T05 测试记录：`npm run test` 初次改为通配符在 Windows 下未展开，已改为显式列出测试文件后通过。
 - T05 验证通过：常规 `npm run test`、MinIO 凭据注入后的 `npm run test`、`npm run typecheck`、`npm run build` 均通过。
 - T05 注意事项：构建输出存在 sharp 相关 `Couldn't load fs/zlib` 警告但退出码为 0；AWS SDK 对当前 Node 20 有未来支持周期警告。
+- T05 已提交，提交哈希为 9c50780。
+- 下一个 task 为 T06：实现年度归档。

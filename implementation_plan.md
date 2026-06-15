@@ -27,7 +27,7 @@
 | T02 | 建立基础 UI 设计系统 | 配置 Tailwind、全局样式、字体变量、基础布局 | 首页呈现高级摄影作品集基调；没有营销式落地页堆砌 | `npm run build`；浏览器响应式审查 | committed |
 | T03 | 定义本地数据模型 | 建立 User、Photo、AlbumYear、StyleProfile、CoverAsset 类型和本地数据层 | 类型能表达上传、年份归档、封面和风格模板 | `npm run build`；类型检查 | committed |
 | T04 | 实现照片上传入口 | 增加上传页面和文件选择流程 | 支持多图选择；显示上传队列和基础错误状态 | 手动上传测试；`npm run build` | committed |
-| T05 | 实现图片处理基础 | 接入 MinIO 原图存储、缩略图生成和照片元数据读取接口 | 能写入 MinIO；能生成展示缩略图；能读取或回退照片年份 | 单元/集成测试；`npm run build` | approved |
+| T05 | 实现图片处理基础 | 接入 MinIO 原图存储、缩略图生成和照片元数据读取接口 | 能写入 MinIO；能生成展示缩略图；能读取或回退照片年份 | 单元/集成测试；`npm run build` | committed |
 | T06 | 实现年度归档 | 按照片年份创建年度相册并展示列表 | 不同年份照片正确分组；缺失 EXIF 时用上传时间 | 手动样例测试；`npm run build` | pending |
 | T07 | 实现行书封面 | 年度封面展示年份、代表照片、行书署名 | 封面视觉符合相册风格；可设置上传者署名 | 浏览器截图审查；`npm run build` | pending |
 | T08 | 实现风格分析与模板映射 | 提取主色、亮度、饱和度、主题标签并映射模板 | 年度相册能得到稳定 StyleProfile 和模板 | 样例照片测试；`npm run build` | pending |
@@ -38,4 +38,4 @@
 
 ## 当前下一个 Task
 
-T05：实现图片处理基础。
+T06：实现年度归档。
