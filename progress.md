@@ -46,4 +46,5 @@
 - T05 注意事项：构建输出存在 sharp 相关 `Couldn't load fs/zlib` 警告但退出码为 0；AWS SDK 对当前 Node 20 有未来支持周期警告。
 - T05 已提交，提交哈希为 9c50780。
 - T05 补充修正已提交，提交哈希为 43cdc99：上传界面不暴露 MinIO 对象 key，API 默认 ownerId 改为本地样例用户。
+- T05 复审完成：确认补充提交 43cdc99/aee0ec4 后仓库干净，MinIO 在线，普通测试、MinIO 实写测试、类型检查和构建均通过。
 - 下一个 task 为 T06：实现年度归档。
