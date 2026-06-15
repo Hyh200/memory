@@ -5,11 +5,13 @@ import { storeProcessedPhoto } from "@/lib/minio-storage";
 export const runtime = "nodejs";
 
 const maxFileSize = 20 * 1024 * 1024;
+const defaultOwnerId = "user_hao";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file");
   const modifiedAt = formData.get("modifiedAt");
+  const ownerId = formData.get("ownerId");
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Missing image file" }, { status: 400 });
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
       originalMimeType: file.type,
       thumbnailBuffer: processed.thumbnailBuffer,
       thumbnailMimeType: processed.thumbnailMimeType,
-      ownerId: "local-user",
+      ownerId: typeof ownerId === "string" && ownerId ? ownerId : defaultOwnerId,
       resolvedYear: processed.resolvedYear,
       fileName: file.name
     });

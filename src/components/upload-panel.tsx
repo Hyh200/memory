@@ -21,9 +21,6 @@ type SelectedPhoto = {
   height?: number;
   orientation?: "landscape" | "portrait" | "square";
   yearSource?: "exif" | "modifiedAt" | "uploadedAt";
-  bucket?: string;
-  originalObjectKey?: string;
-  thumbnailObjectKey?: string;
 };
 
 type ProcessedPhotoResponse = {
@@ -37,9 +34,6 @@ type ProcessedPhotoResponse = {
   capturedAt: string | null;
   resolvedYear: number;
   yearSource: "exif" | "modifiedAt" | "uploadedAt";
-  bucket: string;
-  originalObjectKey: string;
-  thumbnailObjectKey: string;
 };
 
 export function UploadPanel() {
@@ -167,11 +161,6 @@ export function UploadPanel() {
                           {formatYearSource(item.yearSource)}
                         </p>
                       ) : null}
-                      {item.thumbnailObjectKey ? (
-                        <p className="mt-2 break-all text-xs text-stone">
-                          MinIO: {item.thumbnailObjectKey}
-                        </p>
-                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -225,10 +214,7 @@ export function UploadPanel() {
         width: processed.width,
         height: processed.height,
         orientation: processed.orientation,
-        yearSource: processed.yearSource,
-        bucket: processed.bucket,
-        originalObjectKey: processed.originalObjectKey,
-        thumbnailObjectKey: processed.thumbnailObjectKey
+        yearSource: processed.yearSource
       });
     } catch (error) {
       updateItem(item.id, {

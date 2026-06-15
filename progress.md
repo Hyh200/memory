@@ -40,7 +40,7 @@
 - 用户指定图片存储使用 Docker 中的 MinIO，容器名为 `ceramics-minio`。
 - 已确认 `ceramics-minio` 正在运行，MinIO API 暴露在本机 9000 端口，Console 暴露在 9001 端口。
 - T05 开始：接入 MinIO 原图/缩略图存储、Sharp 缩略图生成和 EXIF 年份识别。
-- T05 已完成并审查通过：API 会写入 MinIO 原图和缩略图，前端显示缩略图和 MinIO 对象 key。
+- T05 已完成并审查通过：API 会写入 MinIO 原图和缩略图，前端显示缩略图、尺寸和年份。
 - T05 测试记录：`npm run test` 初次改为通配符在 Windows 下未展开，已改为显式列出测试文件后通过。
 - T05 验证通过：常规 `npm run test`、MinIO 凭据注入后的 `npm run test`、`npm run typecheck`、`npm run build` 均通过。
 - T05 注意事项：构建输出存在 sharp 相关 `Couldn't load fs/zlib` 警告但退出码为 0；AWS SDK 对当前 Node 20 有未来支持周期警告。
