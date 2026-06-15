@@ -29,6 +29,10 @@ export type AlbumYearCard = {
   summary: string;
   photoCount: number;
   uploadedCount: number;
+  coverImageUrl: string | null;
+  representativePhotoName: string | null;
+  signatureText: string;
+  dominantColors: string[];
 };
 
 export function loadArchivedPhotos(): ArchivedPhoto[] {
@@ -80,10 +84,20 @@ export function createAlbumYearCards(
           ? `${albumYear.styleProfile.summary} 新增 ${uploadedCount} 张上传照片。`
           : albumYear.styleProfile.summary,
       photoCount,
-      uploadedCount
+      uploadedCount,
+      coverImageUrl:
+        uploaded[0]?.thumbnailUrl ??
+        albumYear.coverAsset.imageUrl ??
+        albumYear.photos[0]?.thumbnailUrl ??
+        null,
+      representativePhotoName:
+        uploaded[0]?.fileName ?? albumYear.photos[0]?.fileName ?? null,
+      signatureText: albumYear.coverAsset.signatureText,
+      dominantColors: albumYear.styleProfile.dominantColors
     };
   });
   const seededYears = new Set(seedAlbums.map((albumYear) => albumYear.album.year));
+  const fallbackSignature = seedAlbums[0]?.owner.signatureName ?? "未署名";
 
   for (const [year, photos] of uploadsByYear) {
     if (seededYears.has(year)) {
@@ -97,7 +111,11 @@ export function createAlbumYearCards(
       tone: "待分析",
       summary: `已按照片年份归档 ${photos.length} 张新上传照片。`,
       photoCount: photos.length,
-      uploadedCount: photos.length
+      uploadedCount: photos.length,
+      coverImageUrl: photos[0]?.thumbnailUrl ?? null,
+      representativePhotoName: photos[0]?.fileName ?? null,
+      signatureText: fallbackSignature,
+      dominantColors: ["#2f3432", "#d8cfc2", "#15130f"]
     });
   }
 

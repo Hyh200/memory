@@ -29,8 +29,14 @@ test("createAlbumYearCards merges seed albums and new uploaded years", () => {
   assert.deepEqual(years, [2025, 2023]);
   assert.equal(existingYear?.photoCount, 3);
   assert.equal(existingYear?.uploadedCount, 2);
+  assert.equal(existingYear?.signatureText, "宇浩");
+  assert.equal(existingYear?.representativePhotoName, "photo_a.jpg");
+  assert.deepEqual(existingYear?.dominantColors, ["#111111"]);
   assert.equal(newYear?.photoCount, 1);
   assert.equal(newYear?.tone, "待分析");
+  assert.equal(newYear?.signatureText, "宇浩");
+  assert.equal(newYear?.representativePhotoName, "photo_c.jpg");
+  assert.equal(newYear?.coverImageUrl, "data:image/webp;base64,abc");
   assert.match(newYear?.summary ?? "", /已按照片年份归档 1 张/);
 });
 
