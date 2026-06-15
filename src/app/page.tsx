@@ -1,25 +1,9 @@
-const albums = [
-  {
-    year: "2026",
-    title: "春日与海",
-    count: 0,
-    tone: "清透旅行"
-  },
-  {
-    year: "2025",
-    title: "城市日常",
-    count: 0,
-    tone: "胶片日常"
-  },
-  {
-    year: "2024",
-    title: "夜色片段",
-    count: 0,
-    tone: "低调夜景"
-  }
-];
+import { getPhotoCount } from "@/lib/album-model";
+import { listAlbumYears } from "@/lib/local-data";
 
 export default function Home() {
+  const albums = listAlbumYears();
+
   return (
     <main className="min-h-screen bg-[#11100e] text-paper">
       <section className="mx-auto flex min-h-screen w-[min(1180px,calc(100%-32px))] flex-col px-0 py-8 md:w-[min(1180px,calc(100%-64px))] md:py-12">
@@ -46,24 +30,28 @@ export default function Home() {
           </section>
 
           <section className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
-            {albums.map((album) => (
+            {albums.map((albumYear) => (
               <article
                 className="group grid min-h-52 border border-line bg-panel p-5 transition hover:border-paper-muted md:min-h-72 lg:grid-cols-[0.7fr_1fr]"
-                key={album.year}
+                key={albumYear.album.id}
               >
                 <div className="flex flex-col justify-between">
                   <span className="text-5xl font-medium leading-none tracking-normal">
-                    {album.year}
+                    {albumYear.album.year}
                   </span>
-                  <span className="text-sm text-stone">{album.tone}</span>
+                  <span className="text-sm text-stone">
+                    {albumYear.styleProfile.label}
+                  </span>
                 </div>
                 <div className="mt-8 flex flex-col justify-between border-t border-line pt-5 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                   <div>
                     <h2 className="text-xl font-medium tracking-normal">
-                      {album.title}
+                      {albumYear.album.title}
                     </h2>
                     <p className="mt-3 text-sm leading-6 text-stone">
-                      {album.count} 张照片。上传后会自动生成封面、色彩摘要和年度阅读页。
+                      {getPhotoCount(albumYear)}
+                      {" "}
+                      张照片。{albumYear.styleProfile.summary}
                     </p>
                   </div>
                   <button className="mt-8 w-fit text-sm text-paper-muted underline decoration-line underline-offset-4 transition group-hover:text-paper">
