@@ -20,7 +20,7 @@ export default function UploadPage() {
             </h1>
           </div>
           <p className="max-w-sm text-sm leading-6 text-stone">
-            当前步骤只建立本地选择队列。真实上传、缩略图和 EXIF 年份识别将在后续 task 实现。
+            选择照片后会生成展示缩略图，并优先读取 EXIF 拍摄年份；缺失时回退到文件时间。
           </p>
         </header>
 

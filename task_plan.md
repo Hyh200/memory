@@ -23,7 +23,7 @@
 - 相册翻页：react-pageflip，必要时补充 CSS 3D 阴影、纸张厚度和翻页音效开关
 - 数据库：PostgreSQL
 - ORM：Prisma
-- 对象存储：S3 兼容存储，开发期可用 Cloudflare R2、AWS S3 或 MinIO
+- 对象存储：MinIO，使用本地 Docker 容器 `ceramics-minio`，通过 S3 兼容 SDK 访问
 - 图片处理：Sharp
 - 认证：Auth.js 或 Clerk
 - 后台任务：BullMQ + Redis，或托管平台队列
@@ -119,6 +119,7 @@
 任务：
 - 实现登录态上传。
 - 上传原图到对象存储。
+- 对象存储使用 MinIO；本地默认 endpoint 为 `http://127.0.0.1:9000`，凭据通过环境变量提供。
 - 用 Sharp 生成缩略图。
 - 读取 EXIF DateTimeOriginal 得到照片年份，缺失时使用上传时间。
 - 自动归入对应年份相册。

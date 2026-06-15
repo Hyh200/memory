@@ -8,29 +8,59 @@ const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 type SelectedPhoto = {
   id: string;
+  file?: File;
   name: string;
   size: number;
   type: string;
-  status: "ready" | "error";
+  status: "ready" | "processing" | "processed" | "error";
   message: string;
+  thumbnailUrl?: string;
+  resolvedYear?: number;
+  capturedAt?: string | null;
+  width?: number;
+  height?: number;
+  orientation?: "landscape" | "portrait" | "square";
+  yearSource?: "exif" | "modifiedAt" | "uploadedAt";
+  bucket?: string;
+  originalObjectKey?: string;
+  thumbnailObjectKey?: string;
+};
+
+type ProcessedPhotoResponse = {
+  thumbnailUrl: string;
+  thumbnailMimeType: "image/webp";
+  thumbnailWidth: number;
+  thumbnailHeight: number;
+  width: number;
+  height: number;
+  orientation: "landscape" | "portrait" | "square";
+  capturedAt: string | null;
+  resolvedYear: number;
+  yearSource: "exif" | "modifiedAt" | "uploadedAt";
+  bucket: string;
+  originalObjectKey: string;
+  thumbnailObjectKey: string;
 };
 
 export function UploadPanel() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<SelectedPhoto[]>([]);
 
-  const readyCount = useMemo(
-    () => items.filter((item) => item.status === "ready").length,
+  const processedCount = useMemo(
+    () => items.filter((item) => item.status === "processed").length,
     [items]
   );
 
   function handleFiles(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
+    const nextItems = files.map((file) => validateFile(file));
 
-    setItems((current) => [
-      ...current,
-      ...files.map((file) => validateFile(file))
-    ]);
+    setItems((current) => [...current, ...nextItems]);
+    nextItems
+      .filter((item) => item.status === "ready")
+      .forEach((item) => {
+        void processPhoto(item);
+      });
 
     event.target.value = "";
   }
@@ -49,7 +79,7 @@ export function UploadPanel() {
               选择照片
             </h2>
             <p className="mt-4 max-w-sm text-sm leading-6 text-stone">
-              支持 JPG、PNG、WebP。下一步会读取 EXIF 年份并生成缩略图。
+              支持 JPG、PNG、WebP。选择后会读取 EXIF 年份并生成缩略图。
             </p>
           </div>
 
@@ -80,7 +110,7 @@ export function UploadPanel() {
           <div>
             <h2 className="text-xl font-medium tracking-normal">上传队列</h2>
             <p className="mt-2 text-sm text-stone">
-              {readyCount} 张待处理，{items.length - readyCount} 张需处理错误
+              {processedCount} 张可入库，{items.length - processedCount} 张处理中或错误
             </p>
           </div>
           <span className="text-sm text-paper-muted">{items.length} / 50</span>
@@ -97,24 +127,53 @@ export function UploadPanel() {
                 className="grid gap-4 border border-line p-4 md:grid-cols-[1fr_auto]"
                 key={item.id}
               >
-                <div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="max-w-full break-words text-sm font-medium tracking-normal text-paper">
-                      {item.name}
-                    </h3>
-                    <span
-                      className={
-                        item.status === "ready"
-                          ? "text-xs text-paper-muted"
-                          : "text-xs text-[#e9a38f]"
-                      }
-                    >
-                      {item.message}
-                    </span>
+                <div className="grid gap-4 sm:grid-cols-[96px_1fr]">
+                  <div className="flex aspect-square w-24 items-center justify-center overflow-hidden border border-line bg-[#11100e] text-xs text-stone">
+                    {item.thumbnailUrl ? (
+                      <img
+                        alt=""
+                        className="h-full w-full object-cover"
+                        src={item.thumbnailUrl}
+                      />
+                    ) : (
+                      "待生成"
+                    )}
                   </div>
-                  <p className="mt-2 text-xs text-stone">
-                    {item.type || "未知类型"} · {formatFileSize(item.size)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="max-w-full break-words text-sm font-medium tracking-normal text-paper">
+                          {item.name}
+                        </h3>
+                        <span
+                          className={
+                            item.status === "error"
+                              ? "text-xs text-[#e9a38f]"
+                              : "text-xs text-paper-muted"
+                          }
+                        >
+                          {item.message}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs text-stone">
+                        {item.type || "未知类型"} · {formatFileSize(item.size)}
+                        {item.width && item.height
+                          ? ` · ${item.width}×${item.height}`
+                          : ""}
+                      </p>
+                      {item.resolvedYear ? (
+                        <p className="mt-2 text-xs text-paper-muted">
+                          年份 {item.resolvedYear} ·{" "}
+                          {formatYearSource(item.yearSource)}
+                        </p>
+                      ) : null}
+                      {item.thumbnailObjectKey ? (
+                        <p className="mt-2 break-all text-xs text-stone">
+                          MinIO: {item.thumbnailObjectKey}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
 
                 <button
@@ -132,6 +191,58 @@ export function UploadPanel() {
       </section>
     </div>
   );
+
+  async function processPhoto(item: SelectedPhoto) {
+    if (!item.file) {
+      return;
+    }
+
+    updateItem(item.id, { status: "processing", message: "生成缩略图中" });
+
+    try {
+      const formData = new FormData();
+      formData.append("file", item.file);
+      formData.append("modifiedAt", String(item.file.lastModified));
+
+      const response = await fetch("/api/photos/process", {
+        method: "POST",
+        body: formData
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "图片处理失败");
+      }
+
+      const processed = payload as ProcessedPhotoResponse;
+
+      updateItem(item.id, {
+        status: "processed",
+        message: "已生成缩略图",
+        thumbnailUrl: processed.thumbnailUrl,
+        resolvedYear: processed.resolvedYear,
+        capturedAt: processed.capturedAt,
+        width: processed.width,
+        height: processed.height,
+        orientation: processed.orientation,
+        yearSource: processed.yearSource,
+        bucket: processed.bucket,
+        originalObjectKey: processed.originalObjectKey,
+        thumbnailObjectKey: processed.thumbnailObjectKey
+      });
+    } catch (error) {
+      updateItem(item.id, {
+        status: "error",
+        message: error instanceof Error ? error.message : "图片处理失败"
+      });
+    }
+  }
+
+  function updateItem(id: string, patch: Partial<SelectedPhoto>) {
+    setItems((current) =>
+      current.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    );
+  }
 }
 
 function validateFile(file: File): SelectedPhoto {
@@ -159,12 +270,25 @@ function validateFile(file: File): SelectedPhoto {
 
   return {
     id: crypto.randomUUID(),
+    file,
     name: file.name,
     size: file.size,
     type: file.type,
     status: "ready",
     message: "待处理"
   };
+}
+
+function formatYearSource(source: SelectedPhoto["yearSource"]) {
+  if (source === "exif") {
+    return "EXIF";
+  }
+
+  if (source === "modifiedAt") {
+    return "文件时间";
+  }
+
+  return "上传时间";
 }
 
 function formatFileSize(size: number) {
