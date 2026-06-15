@@ -39,6 +39,11 @@
 - `react-pageflip` 支持 React 组件化页面、硬封面、阴影、移动端滚动支持和翻页事件，适合作为第一版真实翻页基础。
 - 需要额外补足产品级体验：首页按钮、上一页、下一页、页码、键盘操作、移动端单页模式、低性能设备降级。
 
+## Tailwind 集成判断
+
+- 当前 Tailwind v4 官方建议通过 PostCSS 集成到 Next.js：安装 `tailwindcss`、`@tailwindcss/postcss`、`postcss`，在 `postcss.config.mjs` 中配置 `@tailwindcss/postcss`，并在全局 CSS 中 `@import "tailwindcss"`。
+- Next.js 官方 Tailwind 指南说明 v3 配置方式已不是最新版首选；最新版 Tailwind 4 设置应参考 Tailwind 官方安装说明。
+
 ## 分享链接判断
 
 - 分享链接不应直接暴露对象存储原始 URL。
