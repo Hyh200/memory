@@ -198,6 +198,55 @@ export function listAlbumYears(): AlbumYearView[] {
   });
 }
 
+export function getAlbumYearByYear(year: number) {
+  return listAlbumYears().find((albumYear) => albumYear.album.year === year);
+}
+
+export function getOrCreateAlbumYearByYear(year: number): AlbumYearView {
+  return getAlbumYearByYear(year) ?? createDraftAlbumYear(year);
+}
+
+function createDraftAlbumYear(year: number): AlbumYearView {
+  const albumId = `archive_${year}`;
+
+  return {
+    album: {
+      id: albumId,
+      ownerId: owner.id,
+      year,
+      title: `${year} 年相册`,
+      photoIds: [],
+      styleProfileId: `style_${albumId}`,
+      coverAssetId: `cover_${albumId}`,
+      createdAt: "2026-06-15T08:00:00.000Z",
+      updatedAt: "2026-06-15T08:00:00.000Z"
+    },
+    owner,
+    photos: [],
+    styleProfile: {
+      id: `style_${albumId}`,
+      albumYearId: albumId,
+      theme: "film-daily",
+      label: "待分析",
+      dominantColors: ["#2f3432", "#d8cfc2", "#15130f"],
+      brightness: 0.5,
+      saturation: 0.24,
+      tags: [],
+      summary: "等待上传照片生成相册风格。",
+      generatedAt: "2026-06-15T08:00:00.000Z"
+    },
+    coverAsset: {
+      id: `cover_${albumId}`,
+      albumYearId: albumId,
+      photoId: null,
+      imageUrl: "",
+      signatureText: owner.signatureName,
+      theme: "film-daily",
+      generatedAt: "2026-06-15T08:00:00.000Z"
+    }
+  };
+}
+
 function mustFind<T extends { id: string }>(
   items: T[],
   id: string,

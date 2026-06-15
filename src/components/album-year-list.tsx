@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import type { AlbumYearView } from "@/lib/album-model";
@@ -71,9 +72,12 @@ export function AlbumYearList({ seedAlbums }: AlbumYearListProps) {
                 </p>
               ) : null}
             </div>
-            <button className="mt-8 w-fit text-sm text-paper-muted underline decoration-line underline-offset-4 transition group-hover:text-paper">
+            <Link
+              className="mt-8 w-fit text-sm text-paper-muted underline decoration-line underline-offset-4 transition group-hover:text-paper"
+              href={`/albums/${album.year}`}
+            >
               查看相册
-            </button>
+            </Link>
           </div>
         </article>
       ))}
