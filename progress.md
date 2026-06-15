@@ -21,3 +21,5 @@
 - 下一个 task 为 T01：搭建 Next.js 项目骨架。
 - T01 开始：采用手工创建最小 Next.js + TypeScript 骨架，避免脚手架在非空目录中引入不可控改动。
 - T01 已完成并审查通过：`npm install`、`npm run typecheck`、`npm run build` 均通过。
+- T01 已提交，提交哈希为 5c70ea3。
+- 下一个 task 为 T02：建立基础 UI 设计系统。

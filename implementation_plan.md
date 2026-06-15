@@ -23,7 +23,7 @@
 | ID | Task | 范围 | 验收标准 | 验证方式 | 状态 |
 |---|---|---|---|---|---|
 | T00 | 建立实现计划与审查流程 | 新增实现计划表、审查记录表，写入 Git 保存规则 | 计划表覆盖 MVP 小任务；审查记录表包含审查状态、验证证据和提交哈希；主计划写入新规则 | 人工审查文档结构；`git status --short` | committed |
-| T01 | 搭建 Next.js 项目骨架 | 初始化 Next.js + TypeScript 项目，保留现有规划文档 | 本地能安装依赖；项目包含基础 app 目录和脚本；规划文档不丢失 | `npm install`；`npm run build` | approved |
+| T01 | 搭建 Next.js 项目骨架 | 初始化 Next.js + TypeScript 项目，保留现有规划文档 | 本地能安装依赖；项目包含基础 app 目录和脚本；规划文档不丢失 | `npm install`；`npm run build` | committed |
 | T02 | 建立基础 UI 设计系统 | 配置 Tailwind、全局样式、字体变量、基础布局 | 首页呈现高级摄影作品集基调；没有营销式落地页堆砌 | `npm run build`；浏览器截图审查 | pending |
 | T03 | 定义本地数据模型 | 建立 User、Photo、AlbumYear、StyleProfile、CoverAsset 类型和本地数据层 | 类型能表达上传、年份归档、封面和风格模板 | `npm run build`；类型检查 | pending |
 | T04 | 实现照片上传入口 | 增加上传页面和文件选择流程 | 支持多图选择；显示上传队列和基础错误状态 | 手动上传测试；`npm run build` | pending |
@@ -38,4 +38,4 @@
 
 ## 当前下一个 Task
 
-T01：搭建 Next.js 项目骨架。
+T02：建立基础 UI 设计系统。
