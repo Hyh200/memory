@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getPhotoCount } from "@/lib/album-model";
+import { AlbumYearList } from "@/components/album-year-list";
 import { listAlbumYears } from "@/lib/local-data";
 
 export default function Home() {
@@ -33,38 +33,7 @@ export default function Home() {
             </p>
           </section>
 
-          <section className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
-            {albums.map((albumYear) => (
-              <article
-                className="group grid min-h-52 border border-line bg-panel p-5 transition hover:border-paper-muted md:min-h-72 lg:grid-cols-[0.7fr_1fr]"
-                key={albumYear.album.id}
-              >
-                <div className="flex flex-col justify-between">
-                  <span className="text-5xl font-medium leading-none tracking-normal">
-                    {albumYear.album.year}
-                  </span>
-                  <span className="text-sm text-stone">
-                    {albumYear.styleProfile.label}
-                  </span>
-                </div>
-                <div className="mt-8 flex flex-col justify-between border-t border-line pt-5 lg:mt-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-                  <div>
-                    <h2 className="text-xl font-medium tracking-normal">
-                      {albumYear.album.title}
-                    </h2>
-                    <p className="mt-3 text-sm leading-6 text-stone">
-                      {getPhotoCount(albumYear)}
-                      {" "}
-                      张照片。{albumYear.styleProfile.summary}
-                    </p>
-                  </div>
-                  <button className="mt-8 w-fit text-sm text-paper-muted underline decoration-line underline-offset-4 transition group-hover:text-paper">
-                    查看相册
-                  </button>
-                </div>
-              </article>
-            ))}
-          </section>
+          <AlbumYearList seedAlbums={albums} />
         </div>
       </section>
     </main>

@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
+import { saveArchivedPhoto } from "@/lib/album-archive";
 
 const maxFileSize = 20 * 1024 * 1024;
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -21,6 +22,9 @@ type SelectedPhoto = {
   height?: number;
   orientation?: "landscape" | "portrait" | "square";
   yearSource?: "exif" | "modifiedAt" | "uploadedAt";
+  bucket?: string;
+  originalObjectKey?: string;
+  thumbnailObjectKey?: string;
 };
 
 type ProcessedPhotoResponse = {
@@ -34,6 +38,9 @@ type ProcessedPhotoResponse = {
   capturedAt: string | null;
   resolvedYear: number;
   yearSource: "exif" | "modifiedAt" | "uploadedAt";
+  bucket: string;
+  originalObjectKey: string;
+  thumbnailObjectKey: string;
 };
 
 export function UploadPanel() {
@@ -214,6 +221,27 @@ export function UploadPanel() {
         width: processed.width,
         height: processed.height,
         orientation: processed.orientation,
+        yearSource: processed.yearSource,
+        bucket: processed.bucket,
+        originalObjectKey: processed.originalObjectKey,
+        thumbnailObjectKey: processed.thumbnailObjectKey
+      });
+      saveArchivedPhoto({
+        id: item.id,
+        ownerId: "user_hao",
+        fileName: item.name,
+        mimeType: item.type,
+        size: item.size,
+        thumbnailUrl: processed.thumbnailUrl,
+        originalObjectKey: processed.originalObjectKey,
+        thumbnailObjectKey: processed.thumbnailObjectKey,
+        bucket: processed.bucket,
+        width: processed.width,
+        height: processed.height,
+        orientation: processed.orientation,
+        capturedAt: processed.capturedAt,
+        uploadedAt: new Date().toISOString(),
+        resolvedYear: processed.resolvedYear,
         yearSource: processed.yearSource
       });
     } catch (error) {
