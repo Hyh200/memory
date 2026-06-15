@@ -14,4 +14,4 @@
 |---|---|---|---|---|---|---|---|
 | T00 | 建立实现计划与审查流程 | 2026-06-15 16:04:46 +08:00 | 计划表覆盖小 task；审查表包含审查字段；主计划写入 Git 保存规则 | 人工审查通过；`git status --short` 显示仅本 task 文档变更 | 通过 | 5d865a3 | 已提交，进入 T01 |
 | T01 | 搭建 Next.js 项目骨架 | 2026-06-15 16:09:48 +08:00 | Next.js + TypeScript 骨架；规划文档保留；生成物排除 | `npm install` 通过；`npm run typecheck` 通过；`npm run build` 通过；`git status --short` 未显示 `.next`、`node_modules`、`tsconfig.tsbuildinfo` | 通过 | 5c70ea3 | 已提交，进入 T02 |
-| T02 | 建立基础 UI 设计系统 | 2026-06-15 16:16:07 +08:00 | Tailwind v4 集成；全局设计 token；首页基础相册工作台；响应式布局 | `npm run typecheck` 通过；`npm run build` 通过；浏览器桌面/移动 DOM 指标无横向溢出；控制台无 error/warn；截图接口两次超时，未作为通过证据 | 通过 | 待提交 | 审查通过，允许提交 |
+| T02 | 建立基础 UI 设计系统 | 2026-06-15 16:16:07 +08:00 | Tailwind v4 集成；全局设计 token；首页基础相册工作台；响应式布局 | `npm run typecheck` 通过；`npm run build` 通过；浏览器桌面/移动 DOM 指标无横向溢出；控制台无 error/warn；截图接口两次超时，未作为通过证据 | 通过 | 60dad2d | 已提交，进入 T03 |
