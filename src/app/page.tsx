@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getPhotoCount } from "@/lib/album-model";
 import { listAlbumYears } from "@/lib/local-data";
 
@@ -14,9 +15,12 @@ export default function Home() {
               年度相册
             </h1>
           </div>
-          <button className="border border-line px-4 py-2 text-sm text-paper transition hover:border-paper">
+          <Link
+            className="border border-line px-4 py-2 text-sm text-paper transition hover:border-paper"
+            href="/upload"
+          >
             上传照片
-          </button>
+          </Link>
         </header>
 
         <div className="grid flex-1 gap-8 py-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-end lg:py-14">
