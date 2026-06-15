@@ -40,6 +40,29 @@ test("createAlbumYearCards merges seed albums and new uploaded years", () => {
   assert.match(newYear?.summary ?? "", /已按照片年份归档 1 张/);
 });
 
+test("createAlbumYearCards applies uploaded photo style to yearly cards", () => {
+  const styledUploads: ArchivedPhoto[] = [
+    {
+      ...createArchivedPhoto("photo_style", 2027, "uploadedAt"),
+      styleAnalysis: {
+        theme: "natural-landscape",
+        label: "自然风景",
+        dominantColors: ["#4f7d56", "#91aa90", "#26342a"],
+        brightness: 0.48,
+        saturation: 0.34,
+        tags: ["中等亮度", "柔和色彩", "自然色"],
+        summary: "中等亮度、柔和色彩、自然色，适合自然风景风格。"
+      }
+    }
+  ];
+  const [card] = createAlbumYearCards([], styledUploads);
+
+  assert.equal(card.year, 2027);
+  assert.equal(card.tone, "自然风景");
+  assert.deepEqual(card.dominantColors, ["#4f7d56", "#91aa90", "#26342a"]);
+  assert.match(card.summary, /适合自然风景风格/);
+});
+
 function createArchivedPhoto(
   id: string,
   resolvedYear: number,

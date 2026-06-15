@@ -3,6 +3,7 @@
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
 import { saveArchivedPhoto } from "@/lib/album-archive";
+import type { StyleAnalysis } from "@/lib/style-analysis";
 
 const maxFileSize = 20 * 1024 * 1024;
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -25,6 +26,7 @@ type SelectedPhoto = {
   bucket?: string;
   originalObjectKey?: string;
   thumbnailObjectKey?: string;
+  styleAnalysis?: StyleAnalysis;
 };
 
 type ProcessedPhotoResponse = {
@@ -41,6 +43,7 @@ type ProcessedPhotoResponse = {
   bucket: string;
   originalObjectKey: string;
   thumbnailObjectKey: string;
+  styleAnalysis: StyleAnalysis;
 };
 
 export function UploadPanel() {
@@ -168,6 +171,12 @@ export function UploadPanel() {
                           {formatYearSource(item.yearSource)}
                         </p>
                       ) : null}
+                      {item.styleAnalysis ? (
+                        <p className="mt-2 text-xs text-paper-muted">
+                          模板 {item.styleAnalysis.label} ·{" "}
+                          {item.styleAnalysis.tags.join(" / ")}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -214,7 +223,7 @@ export function UploadPanel() {
 
       updateItem(item.id, {
         status: "processed",
-        message: "已生成缩略图",
+        message: "已生成风格模板",
         thumbnailUrl: processed.thumbnailUrl,
         resolvedYear: processed.resolvedYear,
         capturedAt: processed.capturedAt,
@@ -224,7 +233,8 @@ export function UploadPanel() {
         yearSource: processed.yearSource,
         bucket: processed.bucket,
         originalObjectKey: processed.originalObjectKey,
-        thumbnailObjectKey: processed.thumbnailObjectKey
+        thumbnailObjectKey: processed.thumbnailObjectKey,
+        styleAnalysis: processed.styleAnalysis
       });
       saveArchivedPhoto({
         id: item.id,
@@ -242,7 +252,8 @@ export function UploadPanel() {
         capturedAt: processed.capturedAt,
         uploadedAt: new Date().toISOString(),
         resolvedYear: processed.resolvedYear,
-        yearSource: processed.yearSource
+        yearSource: processed.yearSource,
+        styleAnalysis: processed.styleAnalysis
       });
     } catch (error) {
       updateItem(item.id, {

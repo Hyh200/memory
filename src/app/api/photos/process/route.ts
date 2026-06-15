@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       capturedAt: processed.capturedAt,
       resolvedYear: processed.resolvedYear,
       yearSource: processed.yearSource,
+      styleAnalysis: processed.styleAnalysis,
       bucket: stored.bucket,
       originalObjectKey: stored.originalObjectKey,
       thumbnailObjectKey: stored.thumbnailObjectKey

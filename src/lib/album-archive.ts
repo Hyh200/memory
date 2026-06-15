@@ -1,4 +1,5 @@
 import type { AlbumYearView, PhotoOrientation } from "./album-model";
+import type { StyleAnalysis } from "./style-analysis";
 
 export const archiveStorageKey = "annual-photo-album.archive.v1";
 
@@ -19,6 +20,7 @@ export type ArchivedPhoto = {
   uploadedAt: string;
   resolvedYear: number;
   yearSource: "exif" | "modifiedAt" | "uploadedAt";
+  styleAnalysis?: StyleAnalysis;
 };
 
 export type AlbumYearCard = {
@@ -73,14 +75,17 @@ export function createAlbumYearCards(
     const uploaded = uploadsByYear.get(albumYear.album.year) ?? [];
     const uploadedCount = uploaded.length;
     const photoCount = albumYear.photos.length + uploadedCount;
+    const uploadStyle = createUploadedStyle(uploaded);
 
     return {
       id: albumYear.album.id,
       year: albumYear.album.year,
       title: albumYear.album.title,
-      tone: albumYear.styleProfile.label,
+      tone: uploadStyle?.label ?? albumYear.styleProfile.label,
       summary:
-        uploadedCount > 0
+        uploadStyle && uploadedCount > 0
+          ? `${uploadStyle.summary} 新增 ${uploadedCount} 张上传照片。`
+          : uploadedCount > 0
           ? `${albumYear.styleProfile.summary} 新增 ${uploadedCount} 张上传照片。`
           : albumYear.styleProfile.summary,
       photoCount,
@@ -93,7 +98,8 @@ export function createAlbumYearCards(
       representativePhotoName:
         uploaded[0]?.fileName ?? albumYear.photos[0]?.fileName ?? null,
       signatureText: albumYear.coverAsset.signatureText,
-      dominantColors: albumYear.styleProfile.dominantColors
+      dominantColors:
+        uploadStyle?.dominantColors ?? albumYear.styleProfile.dominantColors
     };
   });
   const seededYears = new Set(seedAlbums.map((albumYear) => albumYear.album.year));
@@ -104,18 +110,23 @@ export function createAlbumYearCards(
       continue;
     }
 
+    const uploadStyle = createUploadedStyle(photos);
+
     cards.push({
       id: `archive_${year}`,
       year,
       title: `${year} 年相册`,
-      tone: "待分析",
-      summary: `已按照片年份归档 ${photos.length} 张新上传照片。`,
+      tone: uploadStyle?.label ?? "待分析",
+      summary: uploadStyle
+        ? `${uploadStyle.summary} 已按照片年份归档 ${photos.length} 张新上传照片。`
+        : `已按照片年份归档 ${photos.length} 张新上传照片。`,
       photoCount: photos.length,
       uploadedCount: photos.length,
       coverImageUrl: photos[0]?.thumbnailUrl ?? null,
       representativePhotoName: photos[0]?.fileName ?? null,
       signatureText: fallbackSignature,
-      dominantColors: ["#2f3432", "#d8cfc2", "#15130f"]
+      dominantColors:
+        uploadStyle?.dominantColors ?? ["#2f3432", "#d8cfc2", "#15130f"]
     });
   }
 
@@ -132,6 +143,33 @@ export function groupArchivedPhotosByYear(photos: ArchivedPhoto[]) {
   }
 
   return grouped;
+}
+
+function createUploadedStyle(photos: ArchivedPhoto[]) {
+  const styles = photos
+    .map((photo) => photo.styleAnalysis)
+    .filter((style): style is StyleAnalysis => Boolean(style));
+
+  if (styles.length === 0) {
+    return null;
+  }
+
+  const themeCounts = new Map<string, number>();
+  for (const style of styles) {
+    themeCounts.set(style.theme, (themeCounts.get(style.theme) ?? 0) + 1);
+  }
+
+  const dominantTheme = Array.from(themeCounts.entries()).sort(
+    (left, right) => right[1] - left[1]
+  )[0]?.[0];
+  const representative =
+    styles.find((style) => style.theme === dominantTheme) ?? styles[0];
+
+  return {
+    label: representative.label,
+    summary: representative.summary,
+    dominantColors: representative.dominantColors
+  };
 }
 
 function isArchivedPhoto(value: unknown): value is ArchivedPhoto {

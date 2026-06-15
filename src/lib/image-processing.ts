@@ -1,6 +1,7 @@
 import * as exifr from "exifr";
 import sharp from "sharp";
 import type { PhotoOrientation } from "./album-model";
+import { analyzeImageStyle, type StyleAnalysis } from "./style-analysis";
 
 const acceptedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const thumbnailSize = 360;
@@ -26,6 +27,7 @@ export type ProcessedImage = {
   capturedAt: string | null;
   resolvedYear: number;
   yearSource: YearSource;
+  styleAnalysis: StyleAnalysis;
 };
 
 export async function processImageUpload({
@@ -46,6 +48,7 @@ export async function processImageUpload({
   );
   const capturedAt = await extractCapturedAt(buffer);
   const resolvedYear = resolvePhotoYear({ capturedAt, modifiedAt, uploadedAt });
+  const styleAnalysis = await analyzeImageStyle(buffer);
 
   const { data, info } = await sharp(buffer)
     .rotate()
@@ -69,7 +72,8 @@ export async function processImageUpload({
     orientation: getOrientation(dimensions.width, dimensions.height),
     capturedAt,
     resolvedYear: resolvedYear.year,
-    yearSource: resolvedYear.source
+    yearSource: resolvedYear.source,
+    styleAnalysis
   };
 }
 

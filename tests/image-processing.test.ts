@@ -13,7 +13,7 @@ test("processImageUpload creates a display thumbnail and falls back to modified 
       width: 800,
       height: 600,
       channels: 3,
-      background: "#d9a441"
+      background: "#f4c45c"
     }
   })
     .jpeg()
@@ -36,6 +36,9 @@ test("processImageUpload creates a display thumbnail and falls back to modified 
   assert.equal(result.capturedAt, null);
   assert.equal(result.resolvedYear, 2022);
   assert.equal(result.yearSource, "modifiedAt");
+  assert.equal(result.styleAnalysis.theme, "bright-portrait");
+  assert.ok(result.styleAnalysis.dominantColors.length >= 3);
+  assert.ok(result.styleAnalysis.tags.length >= 3);
 });
 
 test("processImageUpload prefers EXIF DateTimeOriginal year", async () => {

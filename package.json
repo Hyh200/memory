@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx --test tests/album-archive.test.ts tests/image-processing.test.ts tests/minio-storage.test.ts",
+    "test": "tsx --test tests/album-archive.test.ts tests/image-processing.test.ts tests/minio-storage.test.ts tests/style-analysis.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
