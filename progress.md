@@ -19,4 +19,5 @@
 - 已把当前 MVP 范围和实施顺序写入规划文件。
 - T00 已审查通过并提交，提交哈希为 5d865a3。
 - 下一个 task 为 T01：搭建 Next.js 项目骨架。
-- 当前尚未创建代码项目，未运行构建或测试。
+- T01 开始：采用手工创建最小 Next.js + TypeScript 骨架，避免脚手架在非空目录中引入不可控改动。
+- T01 已完成并审查通过：`npm install`、`npm run typecheck`、`npm run build` 均通过。

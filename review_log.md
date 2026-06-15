@@ -13,3 +13,4 @@
 | Task ID | Task | 审查时间 | 审查项 | 验证证据 | 结论 | 提交哈希 | 备注 |
 |---|---|---|---|---|---|---|---|
 | T00 | 建立实现计划与审查流程 | 2026-06-15 16:04:46 +08:00 | 计划表覆盖小 task；审查表包含审查字段；主计划写入 Git 保存规则 | 人工审查通过；`git status --short` 显示仅本 task 文档变更 | 通过 | 5d865a3 | 已提交，进入 T01 |
+| T01 | 搭建 Next.js 项目骨架 | 2026-06-15 16:09:48 +08:00 | Next.js + TypeScript 骨架；规划文档保留；生成物排除 | `npm install` 通过；`npm run typecheck` 通过；`npm run build` 通过；`git status --short` 未显示 `.next`、`node_modules`、`tsconfig.tsbuildinfo` | 通过 | 待提交 | 审查通过，允许提交 |
