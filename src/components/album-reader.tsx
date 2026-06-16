@@ -179,7 +179,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   }
 
   return (
-    <section className="min-h-screen bg-[#0f0e0c] px-4 py-5 text-paper md:px-8 md:py-8">
+    <section className="min-h-screen bg-[#0d0c0a] px-4 py-5 text-paper md:px-8 md:py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
           <div>
@@ -234,7 +234,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <div className="flex justify-center">
           <div
-            className="relative grid w-full max-w-3xl overflow-hidden border border-line bg-[#171511] p-2 shadow-[0_32px_90px_rgba(0,0,0,0.42)] md:p-3"
+            className="relative grid w-full max-w-4xl overflow-hidden border border-line bg-[#15130f] p-3 shadow-[0_34px_100px_rgba(0,0,0,0.55)] md:p-4"
             style={{ perspective: "1800px" }}
           >
             <ReaderPaper page={leftPage} />
@@ -243,8 +243,8 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 aria-hidden="true"
                 className={
                   flipDirection === "next"
-                    ? "absolute inset-3 origin-left animate-[album-flip-next_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)]"
-                    : "absolute inset-3 origin-right animate-[album-flip-prev_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)]"
+                    ? "absolute inset-3 origin-left animate-[album-flip-next_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)] md:inset-4"
+                    : "absolute inset-3 origin-right animate-[album-flip-prev_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)] md:inset-4"
                 }
               />
             ) : null}
@@ -294,43 +294,46 @@ function ReaderPaper({
   page: ReaderPage | null;
 }) {
   if (!page) {
-    return <div className="hidden min-h-[34rem] bg-[#15130f] md:block" />;
+    return <div className="aspect-[4/3] w-full bg-[#15130f]" />;
   }
 
   return (
     <article
-      className="flex min-h-[34rem] flex-col bg-paper p-5 text-ink"
+      className="relative aspect-[4/3] w-full overflow-hidden bg-paper text-ink"
       style={getPaperStyle(page)}
     >
-      <div className="grid flex-1 place-items-center">
-        {page.kind === "cover" ? (
+      {page.kind === "cover" ? (
+        <div className="relative grid h-full w-full place-items-center overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={paperTextureStyle}
+          />
           <p
-            className="text-6xl leading-none md:text-7xl"
+            className="relative text-[56px] leading-none text-[#14110d] drop-shadow-[0_8px_18px_rgba(0,0,0,0.14)] md:text-[86px]"
             style={signatureStyle}
           >
             {page.signatureText}
           </p>
-        ) : (
-          <div className="h-full w-full">
-            <div
-              className="flex h-full min-h-[30rem] items-center justify-center overflow-hidden bg-[#e5ded2]"
-              style={getImageStyle(page)}
-            >
-              {page.imageUrl ? (
-                <img
-                  alt=""
-                  className="h-full w-full object-contain"
-                  src={page.imageUrl}
-                />
-              ) : (
-                <span className="text-xs uppercase tracking-[0.24em] text-ink/35">
-                  Annual Album
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div
+          className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#efe8dc]"
+          style={getImageStyle(page)}
+        >
+          {page.imageUrl ? (
+            <img
+              alt=""
+              className="h-full w-full object-cover"
+              src={page.imageUrl}
+            />
+          ) : (
+            <span className="text-xs uppercase text-ink/35">
+              Annual Album
+            </span>
+          )}
+        </div>
+      )}
     </article>
   );
 }
@@ -339,9 +342,14 @@ function getPaperStyle(page: ReaderPage): CSSProperties {
   const [primary, secondary] = page.palette;
 
   return {
-    backgroundImage: `linear-gradient(135deg, ${secondary ?? "#f4efe7"}, #f4efe7 56%, ${
-      primary ?? "#d8cfc2"
-    })`
+    backgroundImage:
+      page.kind === "cover"
+        ? `linear-gradient(135deg, ${secondary ?? "#f4efe7"}, #f5efe5 58%, ${
+            primary ?? "#d8cfc2"
+          }), linear-gradient(90deg, rgba(22,20,17,0.14), transparent 14%, transparent 86%, rgba(22,20,17,0.08))`
+        : "none",
+    boxShadow:
+      "inset 0 0 0 1px rgba(22,20,17,0.08), inset 18px 0 34px rgba(22,20,17,0.08), inset -10px 0 26px rgba(255,255,255,0.18)"
   };
 }
 
@@ -360,4 +368,12 @@ function getImageStyle(page: ReaderPage): CSSProperties {
 
 const signatureStyle: CSSProperties = {
   fontFamily: '"STXingkai", "华文行楷", "KaiTi", "楷体", serif'
+};
+
+const paperTextureStyle: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(0deg, rgba(22,20,17,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(22,20,17,0.025) 1px, transparent 1px)",
+  backgroundSize: "28px 28px, 32px 32px",
+  mixBlendMode: "multiply",
+  opacity: 0.42
 };
