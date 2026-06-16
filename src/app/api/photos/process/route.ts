@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { processImageUpload } from "@/lib/image-processing";
-import { storeProcessedPhoto } from "@/lib/minio-storage";
+import {
+  storeProcessedPhoto,
+  upsertArchivedPhotoInMinio
+} from "@/lib/minio-storage";
 
 export const runtime = "nodejs";
 
 const maxFileSize = 20 * 1024 * 1024;
-const defaultOwnerId = "user_hao";
+const defaultOwnerId = "user_xie";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -23,36 +26,52 @@ export async function POST(request: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
+    const uploadedAt = new Date();
+    const resolvedOwnerId =
+      typeof ownerId === "string" && ownerId ? ownerId : defaultOwnerId;
     const processed = await processImageUpload({
       buffer,
       mimeType: file.type,
-      modifiedAt: typeof modifiedAt === "string" ? modifiedAt : null
+      modifiedAt: typeof modifiedAt === "string" ? modifiedAt : null,
+      uploadedAt
     });
     const stored = await storeProcessedPhoto({
       originalBuffer: buffer,
       originalMimeType: file.type,
       thumbnailBuffer: processed.thumbnailBuffer,
       thumbnailMimeType: processed.thumbnailMimeType,
-      ownerId: typeof ownerId === "string" && ownerId ? ownerId : defaultOwnerId,
+      ownerId: resolvedOwnerId,
       resolvedYear: processed.resolvedYear,
       fileName: file.name
     });
-
-    return NextResponse.json({
+    const archivedPhoto = {
+      id: stored.photoId,
+      ownerId: resolvedOwnerId,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
       thumbnailUrl: processed.thumbnailDataUrl,
-      thumbnailMimeType: processed.thumbnailMimeType,
-      thumbnailWidth: processed.thumbnailWidth,
-      thumbnailHeight: processed.thumbnailHeight,
+      originalObjectKey: stored.originalObjectKey,
+      thumbnailObjectKey: stored.thumbnailObjectKey,
+      bucket: stored.bucket,
       width: processed.width,
       height: processed.height,
       orientation: processed.orientation,
       capturedAt: processed.capturedAt,
+      uploadedAt: uploadedAt.toISOString(),
       resolvedYear: processed.resolvedYear,
       yearSource: processed.yearSource,
-      styleAnalysis: processed.styleAnalysis,
-      bucket: stored.bucket,
-      originalObjectKey: stored.originalObjectKey,
-      thumbnailObjectKey: stored.thumbnailObjectKey
+      styleAnalysis: processed.styleAnalysis
+    };
+
+    await upsertArchivedPhotoInMinio(archivedPhoto);
+
+    return NextResponse.json({
+      ...archivedPhoto,
+      thumbnailUrl: processed.thumbnailDataUrl,
+      thumbnailMimeType: processed.thumbnailMimeType,
+      thumbnailWidth: processed.thumbnailWidth,
+      thumbnailHeight: processed.thumbnailHeight
     });
   } catch (error) {
     const message =

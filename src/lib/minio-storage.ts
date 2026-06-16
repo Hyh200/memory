@@ -1,10 +1,13 @@
 import {
   CreateBucketCommand,
+  GetObjectCommand,
   HeadBucketCommand,
   PutObjectCommand,
   S3Client
 } from "@aws-sdk/client-s3";
 import { randomUUID } from "node:crypto";
+import type { ArchivedPhoto } from "./album-archive";
+import { isArchivedPhoto, mergeArchivedPhoto } from "./album-archive";
 
 const defaultEndpoint = "http://127.0.0.1:9000";
 const defaultRegion = "us-east-1";
@@ -13,6 +16,7 @@ const defaultBucket = "annual-photo-album";
 let bucketReady = false;
 
 export type StoredPhotoObjects = {
+  photoId: string;
   bucket: string;
   originalObjectKey: string;
   thumbnailObjectKey: string;
@@ -72,9 +76,73 @@ export async function storeProcessedPhoto({
   ]);
 
   return {
+    photoId,
     bucket: config.bucket,
     originalObjectKey,
     thumbnailObjectKey
+  };
+}
+
+export async function readArchivedPhotosFromMinio(ownerId: string) {
+  const config = getMinioConfig();
+  const client = createMinioClient(config);
+  await ensureBucket(client, config.bucket);
+
+  try {
+    const response = await client.send(
+      new GetObjectCommand({
+        Bucket: config.bucket,
+        Key: getArchiveObjectKey(ownerId)
+      })
+    );
+    const text = await readBodyAsText(response.Body);
+    const payload = JSON.parse(text);
+
+    return Array.isArray(payload) ? payload.filter(isArchivedPhoto) : [];
+  } catch (error) {
+    if (isMissingObjectError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+export async function upsertArchivedPhotoInMinio(photo: ArchivedPhoto) {
+  const config = getMinioConfig();
+  const client = createMinioClient(config);
+  await ensureBucket(client, config.bucket);
+
+  const current = await readArchivedPhotosFromMinio(photo.ownerId);
+  const next = mergeArchivedPhoto(current, photo);
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: config.bucket,
+      Key: getArchiveObjectKey(photo.ownerId),
+      Body: Buffer.from(JSON.stringify(next), "utf8"),
+      ContentType: "application/json; charset=utf-8"
+    })
+  );
+
+  return next;
+}
+
+export async function getObjectFromMinio(key: string) {
+  const config = getMinioConfig();
+  const client = createMinioClient(config);
+  await ensureBucket(client, config.bucket);
+
+  const response = await client.send(
+    new GetObjectCommand({
+      Bucket: config.bucket,
+      Key: key
+    })
+  );
+
+  return {
+    body: await readBodyAsBytes(response.Body),
+    contentType: response.ContentType ?? "application/octet-stream"
   };
 }
 
@@ -128,4 +196,64 @@ function sanitizePathPart(value: string) {
 function sanitizeFileName(value: string) {
   const normalized = value.replace(/\\/g, "/").split("/").pop() ?? "photo";
   return normalized.replace(/[^a-zA-Z0-9._-]/g, "-");
+}
+
+function getArchiveObjectKey(ownerId: string) {
+  return `users/${sanitizePathPart(ownerId)}/archive/photos.json`;
+}
+
+function isMissingObjectError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const candidate = error as {
+    name?: string;
+    $metadata?: { httpStatusCode?: number };
+  };
+  return (
+    candidate.name === "NoSuchKey" ||
+    candidate.name === "NotFound" ||
+    candidate.$metadata?.httpStatusCode === 404
+  );
+}
+
+async function readBodyAsText(body: unknown) {
+  if (body && typeof body === "object" && "transformToString" in body) {
+    const streamBody = body as { transformToString: () => Promise<string> };
+    return streamBody.transformToString();
+  }
+
+  return Buffer.from(await readBodyAsBytes(body)).toString("utf8");
+}
+
+async function readBodyAsBytes(body: unknown): Promise<Uint8Array> {
+  if (!body) {
+    return new Uint8Array();
+  }
+
+  if (body instanceof Uint8Array) {
+    return body;
+  }
+
+  if (body && typeof body === "object" && "transformToByteArray" in body) {
+    const streamBody = body as {
+      transformToByteArray: () => Promise<Uint8Array>;
+    };
+    return streamBody.transformToByteArray();
+  }
+
+  if (Symbol.asyncIterator in Object(body)) {
+    const chunks: Uint8Array[] = [];
+
+    for await (const chunk of body as AsyncIterable<
+      Uint8Array | Buffer | string
+    >) {
+      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+    }
+
+    return Buffer.concat(chunks);
+  }
+
+  throw new Error("Unsupported MinIO response body");
 }

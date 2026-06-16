@@ -42,6 +42,11 @@ type SelectedPhoto = {
 };
 
 type ProcessedPhotoResponse = {
+  id: string;
+  ownerId: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
   thumbnailUrl: string;
   thumbnailMimeType: "image/webp";
   thumbnailWidth: number;
@@ -50,6 +55,7 @@ type ProcessedPhotoResponse = {
   height: number;
   orientation: "landscape" | "portrait" | "square";
   capturedAt: string | null;
+  uploadedAt: string;
   resolvedYear: number;
   yearSource: "exif" | "modifiedAt" | "uploadedAt";
   bucket: string;
@@ -294,11 +300,11 @@ export function UploadPanel() {
         styleAnalysis: processed.styleAnalysis
       });
       saveArchivedPhoto({
-        id: item.id,
-        ownerId: "user_hao",
-        fileName: item.name,
-        mimeType: item.type,
-        size: item.size,
+        id: processed.id,
+        ownerId: processed.ownerId,
+        fileName: processed.fileName,
+        mimeType: processed.mimeType,
+        size: processed.size,
         thumbnailUrl: processed.thumbnailUrl,
         originalObjectKey: processed.originalObjectKey,
         thumbnailObjectKey: processed.thumbnailObjectKey,
@@ -307,7 +313,7 @@ export function UploadPanel() {
         height: processed.height,
         orientation: processed.orientation,
         capturedAt: processed.capturedAt,
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: processed.uploadedAt,
         resolvedYear: processed.resolvedYear,
         yearSource: processed.yearSource,
         styleAnalysis: processed.styleAnalysis

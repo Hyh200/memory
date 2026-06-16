@@ -5,6 +5,7 @@ import {
   createAlbumYearCards,
   filterAlbumCardsByYear,
   groupArchivedPhotosByYear,
+  mergeArchivedPhoto,
   type ArchivedPhoto
 } from "../src/lib/album-archive";
 
@@ -74,6 +75,23 @@ test("filterAlbumCardsByYear keeps only the requested year", () => {
     filterAlbumCardsByYear(cards, 2026).map((card) => card.year),
     [2026]
   );
+});
+
+test("mergeArchivedPhoto replaces the same photo id and keeps newest first", () => {
+  const current = [
+    createArchivedPhoto("photo_a", 2025, "exif"),
+    createArchivedPhoto("photo_b", 2025, "modifiedAt")
+  ];
+  const updated = {
+    ...createArchivedPhoto("photo_b", 2026, "uploadedAt"),
+    fileName: "photo_b_updated.jpg"
+  };
+  const next = mergeArchivedPhoto(current, updated);
+
+  assert.equal(next.length, 2);
+  assert.equal(next[0].id, "photo_b");
+  assert.equal(next[0].fileName, "photo_b_updated.jpg");
+  assert.equal(next[1].id, "photo_a");
 });
 
 function createArchivedPhoto(

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "年度相册",
+  title: "流光岁月",
   description: "按照片年份归档的私人年度相册"
 };
 

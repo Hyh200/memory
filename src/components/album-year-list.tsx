@@ -8,6 +8,7 @@ import {
   createAlbumYearCards,
   filterAlbumCardsByYear,
   loadArchivedPhotos,
+  loadRemoteArchivedPhotos,
   type AlbumYearCard
 } from "@/lib/album-archive";
 
@@ -22,12 +23,43 @@ export function AlbumYearList({ seedAlbums }: AlbumYearListProps) {
   );
 
   useEffect(() => {
+    let cancelled = false;
+    const localPhotos = loadArchivedPhotos();
+
     setCards(
       filterAlbumCardsByYear(
-        createAlbumYearCards(seedAlbums, loadArchivedPhotos()),
+        createAlbumYearCards(seedAlbums, localPhotos),
         currentYear
       )
     );
+
+    loadRemoteArchivedPhotos()
+      .then((remotePhotos) => {
+        if (cancelled || remotePhotos.length === 0) {
+          return;
+        }
+
+        setCards(
+          filterAlbumCardsByYear(
+            createAlbumYearCards(seedAlbums, remotePhotos),
+            currentYear
+          )
+        );
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCards(
+            filterAlbumCardsByYear(
+              createAlbumYearCards(seedAlbums, localPhotos),
+              currentYear
+            )
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentYear, seedAlbums]);
 
   return (

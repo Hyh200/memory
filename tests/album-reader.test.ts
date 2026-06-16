@@ -18,6 +18,11 @@ test("createReaderPages builds cover, uploaded photos, and seed photos", () => {
   assert.equal(pages[1].id, "archive_uploaded_a");
   assert.equal(pages[2].id, "seed_photo");
   assert.equal(pages[0].signatureText, "宇浩");
+  assert.equal(
+    pages[1].imageUrl,
+    "/api/photos/object?key=users%2Fuser_hao%2Fyears%2F2026%2Fuploaded_a%2Foriginal%2Fuploaded_a.jpg"
+  );
+  assert.equal(pages[2].imageUrl, "/seed.jpg");
 });
 
 test("reader navigation uses single-page and double-page steps", () => {

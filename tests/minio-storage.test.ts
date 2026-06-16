@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import sharp from "sharp";
-import { getMinioConfig, storeProcessedPhoto } from "../src/lib/minio-storage";
+import {
+  getMinioConfig,
+  readArchivedPhotosFromMinio,
+  storeProcessedPhoto,
+  upsertArchivedPhotoInMinio
+} from "../src/lib/minio-storage";
 
 const hasMinioCredentials =
   Boolean(process.env.MINIO_ACCESS_KEY) && Boolean(process.env.MINIO_SECRET_KEY);
@@ -35,6 +40,26 @@ test(
       resolvedYear: 2026,
       fileName: "minio integration.jpg"
     });
+    const archivedPhoto = {
+      id: stored.photoId,
+      ownerId: "test-user",
+      fileName: "minio integration.jpg",
+      mimeType: "image/jpeg",
+      size: originalBuffer.length,
+      thumbnailUrl: "data:image/webp;base64,test",
+      originalObjectKey: stored.originalObjectKey,
+      thumbnailObjectKey: stored.thumbnailObjectKey,
+      bucket: stored.bucket,
+      width: 32,
+      height: 24,
+      orientation: "landscape" as const,
+      capturedAt: null,
+      uploadedAt: "2026-06-16T00:00:00.000Z",
+      resolvedYear: 2026,
+      yearSource: "uploadedAt" as const
+    };
+    await upsertArchivedPhotoInMinio(archivedPhoto);
+    const archive = await readArchivedPhotosFromMinio("test-user");
     const config = getMinioConfig();
     const client = new S3Client({
       endpoint: config.endpoint,
@@ -62,9 +87,11 @@ test(
     ]);
 
     assert.equal(stored.bucket, config.bucket);
+    assert.match(stored.photoId, /^[0-9a-f-]{36}$/);
     assert.equal(originalHead.ContentType, "image/jpeg");
     assert.equal(thumbnailHead.ContentType, "image/webp");
     assert.match(stored.originalObjectKey, /^users\/test-user\/years\/2026\//);
     assert.match(stored.thumbnailObjectKey, /\/thumb\/thumbnail\.webp$/);
+    assert.ok(archive.some((photo) => photo.id === stored.photoId));
   }
 );

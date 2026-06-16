@@ -28,7 +28,7 @@ export function createReaderPages(
       year: albumYear.album.year,
       title: photo.fileName,
       subtitle: formatPhotoSubtitle(photo.width, photo.height),
-      imageUrl: photo.thumbnailUrl,
+      imageUrl: getArchivedPhotoImageUrl(photo),
       signatureText,
       palette
     })),
@@ -38,7 +38,7 @@ export function createReaderPages(
       year: albumYear.album.year,
       title: photo.fileName,
       subtitle: photo.tags.length > 0 ? photo.tags.join(" / ") : "年度照片",
-      imageUrl: photo.thumbnailUrl,
+      imageUrl: photo.originalUrl,
       signatureText,
       palette
     }))
@@ -90,6 +90,10 @@ export function getNextReaderIndex({
 
 function formatPhotoSubtitle(width: number, height: number) {
   return width > 0 && height > 0 ? `${width}×${height}` : "上传照片";
+}
+
+function getArchivedPhotoImageUrl(photo: ArchivedPhoto) {
+  return `/api/photos/object?key=${encodeURIComponent(photo.originalObjectKey)}`;
 }
 
 function getLastReaderStartIndex(pageCount: number, isSinglePage: boolean) {

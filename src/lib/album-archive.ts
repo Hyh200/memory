@@ -62,8 +62,28 @@ export function saveArchivedPhoto(photo: ArchivedPhoto) {
   }
 
   const current = loadArchivedPhotos();
-  const next = [photo, ...current.filter((item) => item.id !== photo.id)];
+  const next = mergeArchivedPhoto(current, photo);
   window.localStorage.setItem(archiveStorageKey, JSON.stringify(next));
+}
+
+export async function loadRemoteArchivedPhotos(): Promise<ArchivedPhoto[]> {
+  const response = await fetch("/api/photos/archive", { cache: "no-store" });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const payload = await response.json();
+  return Array.isArray(payload.photos)
+    ? payload.photos.filter(isArchivedPhoto)
+    : [];
+}
+
+export function mergeArchivedPhoto(
+  current: ArchivedPhoto[],
+  photo: ArchivedPhoto
+) {
+  return [photo, ...current.filter((item) => item.id !== photo.id)];
 }
 
 export function createAlbumYearCards(
@@ -179,7 +199,7 @@ function createUploadedStyle(photos: ArchivedPhoto[]) {
   };
 }
 
-function isArchivedPhoto(value: unknown): value is ArchivedPhoto {
+export function isArchivedPhoto(value: unknown): value is ArchivedPhoto {
   if (!value || typeof value !== "object") {
     return false;
   }

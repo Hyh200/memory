@@ -10,9 +10,9 @@ export default function Home() {
       <section className="mx-auto flex min-h-screen w-[min(1180px,calc(100%-32px))] flex-col px-0 py-8 md:w-[min(1180px,calc(100%-64px))] md:py-12">
         <header className="flex items-center justify-between border-b border-line pb-5">
           <div>
-            <p className="text-xs text-stone">Annual Photo Album</p>
+            <p className="text-xs text-stone">Luminous Years</p>
             <h1 className="mt-2 text-2xl font-medium tracking-normal md:text-3xl">
-              年度相册
+              流光岁月
             </h1>
           </div>
           <Link

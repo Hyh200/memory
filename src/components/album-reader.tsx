@@ -11,7 +11,10 @@ import {
   XCircle
 } from "lucide-react";
 import type { ArchivedPhoto } from "@/lib/album-archive";
-import { loadArchivedPhotos } from "@/lib/album-archive";
+import {
+  loadArchivedPhotos,
+  loadRemoteArchivedPhotos
+} from "@/lib/album-archive";
 import type { AlbumYearView } from "@/lib/album-model";
 import {
   createReaderPages,
@@ -36,7 +39,6 @@ type ShareState = {
 export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   const [archivedPhotos, setArchivedPhotos] = useState<ArchivedPhoto[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
-  const [isSinglePage, setIsSinglePage] = useState(false);
   const [flipDirection, setFlipDirection] = useState<FlipDirection | null>(
     null
   );
@@ -47,8 +49,8 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
     () => createReaderPages(albumYear, archivedPhotos),
     [albumYear, archivedPhotos]
   );
+  const isSinglePage = true;
   const leftPage = pages[pageIndex];
-  const rightPage = isSinglePage ? null : pages[pageIndex + 1] ?? null;
   const atFirstPage = pageIndex === 0;
   const atLastPage =
     getNextReaderIndex({
@@ -59,16 +61,25 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
     }) === pageIndex;
 
   useEffect(() => {
-    setArchivedPhotos(loadArchivedPhotos());
-  }, []);
+    let cancelled = false;
+    const localPhotos = loadArchivedPhotos();
 
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 767px)");
-    const sync = () => setIsSinglePage(query.matches);
+    setArchivedPhotos(localPhotos);
+    loadRemoteArchivedPhotos()
+      .then((remotePhotos) => {
+        if (!cancelled && remotePhotos.length > 0) {
+          setArchivedPhotos(remotePhotos);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setArchivedPhotos(localPhotos);
+        }
+      });
 
-    sync();
-    query.addEventListener("change", sync);
-    return () => query.removeEventListener("change", sync);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function go(direction: "first" | "previous" | "next") {
@@ -176,9 +187,6 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
               {albumYear.album.year}
             </h1>
           </div>
-          <p className="text-sm text-paper-muted">
-            {pageIndex + 1} / {pages.length}
-          </p>
         </header>
 
         {canShare ? (
@@ -226,18 +234,17 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <div className="flex justify-center">
           <div
-            className="relative grid w-full max-w-5xl overflow-hidden border border-line bg-[#171511] p-2 shadow-[0_32px_90px_rgba(0,0,0,0.42)] md:grid-cols-2 md:p-3"
+            className="relative grid w-full max-w-3xl overflow-hidden border border-line bg-[#171511] p-2 shadow-[0_32px_90px_rgba(0,0,0,0.42)] md:p-3"
             style={{ perspective: "1800px" }}
           >
-            <ReaderPaper page={leftPage} side="left" />
-            <ReaderPaper page={rightPage} side="right" />
+            <ReaderPaper page={leftPage} />
             {flipDirection ? (
               <div
                 aria-hidden="true"
                 className={
                   flipDirection === "next"
-                    ? "absolute inset-y-3 right-3 hidden w-[calc(50%-0.75rem)] origin-left animate-[album-flip-next_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)] md:block"
-                    : "absolute inset-y-3 left-3 hidden w-[calc(50%-0.75rem)] origin-right animate-[album-flip-prev_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)] md:block"
+                    ? "absolute inset-3 origin-left animate-[album-flip-next_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)]"
+                    : "absolute inset-3 origin-right animate-[album-flip-prev_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)]"
                 }
               />
             ) : null}
@@ -282,11 +289,9 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 }
 
 function ReaderPaper({
-  page,
-  side
+  page
 }: {
   page: ReaderPage | null;
-  side: "left" | "right";
 }) {
   if (!page) {
     return <div className="hidden min-h-[34rem] bg-[#15130f] md:block" />;
@@ -294,11 +299,7 @@ function ReaderPaper({
 
   return (
     <article
-      className={
-        side === "right"
-          ? "hidden min-h-[34rem] border-l border-[#d8cfc2]/30 bg-paper p-5 text-ink md:flex md:flex-col"
-          : "flex min-h-[34rem] flex-col bg-paper p-5 text-ink"
-      }
+      className="flex min-h-[34rem] flex-col bg-paper p-5 text-ink"
       style={getPaperStyle(page)}
     >
       <div className="grid flex-1 place-items-center">
@@ -315,7 +316,13 @@ function ReaderPaper({
               className="flex h-full min-h-[30rem] items-center justify-center overflow-hidden bg-[#e5ded2]"
               style={getImageStyle(page)}
             >
-              {page.imageUrl ? null : (
+              {page.imageUrl ? (
+                <img
+                  alt=""
+                  className="h-full w-full object-contain"
+                  src={page.imageUrl}
+                />
+              ) : (
                 <span className="text-xs uppercase tracking-[0.24em] text-ink/35">
                   Annual Album
                 </span>
@@ -340,18 +347,14 @@ function getPaperStyle(page: ReaderPage): CSSProperties {
 
 function getImageStyle(page: ReaderPage): CSSProperties {
   const [primary, secondary, shadow] = page.palette;
-  const imageLayer = page.imageUrl
-    ? `, url("${page.imageUrl.replaceAll("\"", "%22")}")`
-    : "";
 
   return {
     backgroundColor: primary ?? "#d8cfc2",
-    backgroundImage: `linear-gradient(135deg, ${primary ?? "#d8cfc2"}, ${
-      secondary ?? "#f4efe7"
-    } 52%, ${shadow ?? "#161411"})${imageLayer}`,
-    backgroundBlendMode: page.imageUrl ? "multiply, normal" : "normal",
-    backgroundPosition: "center",
-    backgroundSize: "cover"
+    backgroundImage: page.imageUrl
+      ? "none"
+      : `linear-gradient(135deg, ${primary ?? "#d8cfc2"}, ${
+          secondary ?? "#f4efe7"
+        } 52%, ${shadow ?? "#161411"})`
   };
 }
 
