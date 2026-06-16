@@ -1,9 +1,20 @@
 "use client";
 
 import { ChangeEvent, useMemo, useRef, useState } from "react";
-import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
+import {
+  ImagePlus,
+  Loader2,
+  RotateCcw,
+  Trash2,
+  UploadCloud
+} from "lucide-react";
 import { saveArchivedPhoto } from "@/lib/album-archive";
 import type { StyleAnalysis } from "@/lib/style-analysis";
+import {
+  clampProgress,
+  createUploadQueueSummary,
+  type UploadQueueStatus
+} from "@/lib/upload-queue";
 
 const maxFileSize = 20 * 1024 * 1024;
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -14,8 +25,9 @@ type SelectedPhoto = {
   name: string;
   size: number;
   type: string;
-  status: "ready" | "processing" | "processed" | "error";
+  status: UploadQueueStatus;
   message: string;
+  progress: number;
   thumbnailUrl?: string;
   resolvedYear?: number;
   capturedAt?: string | null;
@@ -50,8 +62,8 @@ export function UploadPanel() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<SelectedPhoto[]>([]);
 
-  const processedCount = useMemo(
-    () => items.filter((item) => item.status === "processed").length,
+  const queueSummary = useMemo(
+    () => createUploadQueueSummary(items),
     [items]
   );
 
@@ -75,8 +87,8 @@ export function UploadPanel() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
-      <section className="border border-line bg-panel p-6">
-        <div className="flex h-full min-h-72 flex-col justify-between">
+      <section className="border border-line bg-panel p-5 md:p-6">
+        <div className="flex h-full min-h-64 flex-col justify-between md:min-h-72">
           <div>
             <UploadCloud aria-hidden="true" className="h-9 w-9 text-paper" />
             <h2 className="mt-8 text-3xl font-medium tracking-normal">
@@ -98,26 +110,41 @@ export function UploadPanel() {
               onChange={handleFiles}
             />
             <button
-              className="inline-flex items-center gap-2 border border-line px-4 py-3 text-sm text-paper transition hover:border-paper"
+              className="inline-flex min-h-11 items-center gap-2 border border-line px-4 py-3 text-sm text-paper transition hover:border-paper disabled:cursor-not-allowed disabled:opacity-45"
+              disabled={queueSummary.isBusy}
               type="button"
               onClick={() => inputRef.current?.click()}
             >
               <ImagePlus aria-hidden="true" className="h-4 w-4" />
-              添加照片
+              {queueSummary.isBusy ? "处理中" : "添加照片"}
             </button>
           </div>
         </div>
       </section>
 
-      <section className="border border-line bg-[#171511] p-6">
-        <div className="flex items-start justify-between gap-6 border-b border-line pb-5">
+      <section className="border border-line bg-[#171511] p-5 md:p-6">
+        <div className="grid gap-4 border-b border-line pb-5 md:grid-cols-[1fr_auto] md:items-start">
           <div>
             <h2 className="text-xl font-medium tracking-normal">上传队列</h2>
             <p className="mt-2 text-sm text-stone">
-              {processedCount} 张可入库，{items.length - processedCount} 张处理中或错误
+              {queueSummary.processed} 张可入库，{queueSummary.active} 张处理中，
+              {queueSummary.error} 张错误
             </p>
           </div>
-          <span className="text-sm text-paper-muted">{items.length} / 50</span>
+          <div className="min-w-28 text-left md:text-right">
+            <span className="text-sm text-paper-muted">
+              {queueSummary.total} / 50
+            </span>
+            <p className="mt-1 text-xs text-stone">
+              {queueSummary.averageProgress}% 完成
+            </p>
+          </div>
+          <div className="h-1.5 overflow-hidden bg-[#11100e] md:col-span-2">
+            <div
+              className="h-full bg-paper transition-all duration-300"
+              style={{ width: `${queueSummary.averageProgress}%` }}
+            />
+          </div>
         </div>
 
         <div className="mt-5 grid gap-3">
@@ -128,11 +155,11 @@ export function UploadPanel() {
           ) : (
             items.map((item) => (
               <article
-                className="grid gap-4 border border-line p-4 md:grid-cols-[1fr_auto]"
+                className="grid gap-4 border border-line p-3 md:grid-cols-[1fr_auto] md:p-4"
                 key={item.id}
               >
-                <div className="grid gap-4 sm:grid-cols-[96px_1fr]">
-                  <div className="flex aspect-square w-24 items-center justify-center overflow-hidden border border-line bg-[#11100e] text-xs text-stone">
+                <div className="grid min-w-0 gap-4 sm:grid-cols-[96px_1fr]">
+                  <div className="flex aspect-square w-full max-w-28 items-center justify-center overflow-hidden border border-line bg-[#11100e] text-xs text-stone sm:w-24">
                     {item.thumbnailUrl ? (
                       <img
                         alt=""
@@ -143,21 +170,13 @@ export function UploadPanel() {
                       "待生成"
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="min-w-0">
+                  <div className="min-w-0">
+                    <div className="flex h-full flex-col justify-center">
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="max-w-full break-words text-sm font-medium tracking-normal text-paper">
                           {item.name}
                         </h3>
-                        <span
-                          className={
-                            item.status === "error"
-                              ? "text-xs text-[#e9a38f]"
-                              : "text-xs text-paper-muted"
-                          }
-                        >
-                          {item.message}
-                        </span>
+                        <StatusLabel item={item} />
                       </div>
                       <p className="mt-2 text-xs text-stone">
                         {item.type || "未知类型"} · {formatFileSize(item.size)}
@@ -177,18 +196,48 @@ export function UploadPanel() {
                           {item.styleAnalysis.tags.join(" / ")}
                         </p>
                       ) : null}
+                      <div className="mt-3 h-1.5 overflow-hidden bg-[#11100e]">
+                        <div
+                          className={
+                            item.status === "error"
+                              ? "h-full bg-[#e9a38f] transition-all duration-300"
+                              : "h-full bg-paper transition-all duration-300"
+                          }
+                          style={{ width: `${clampProgress(item.progress)}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <button
-                  aria-label={`移除 ${item.name}`}
-                  className="inline-flex h-9 w-9 items-center justify-center border border-line text-stone transition hover:border-paper hover:text-paper"
-                  type="button"
-                  onClick={() => clearItem(item.id)}
-                >
-                  <Trash2 aria-hidden="true" className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-2 md:flex-col">
+                  {item.status === "error" && item.file ? (
+                    <button
+                      aria-label={`重试 ${item.name}`}
+                      className="inline-flex h-9 w-9 items-center justify-center border border-line text-stone transition hover:border-paper hover:text-paper"
+                      type="button"
+                      onClick={() => {
+                        updateItem(item.id, {
+                          status: "ready",
+                          message: "等待重试",
+                          progress: 5
+                        });
+                        void processPhoto(item);
+                      }}
+                    >
+                      <RotateCcw aria-hidden="true" className="h-4 w-4" />
+                    </button>
+                  ) : null}
+                  <button
+                    aria-label={`移除 ${item.name}`}
+                    className="inline-flex h-9 w-9 items-center justify-center border border-line text-stone transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                    disabled={item.status === "processing"}
+                    type="button"
+                    onClick={() => clearItem(item.id)}
+                  >
+                    <Trash2 aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                </div>
               </article>
             ))
           )}
@@ -202,28 +251,36 @@ export function UploadPanel() {
       return;
     }
 
-    updateItem(item.id, { status: "processing", message: "生成缩略图中" });
+    updateItem(item.id, {
+      status: "processing",
+      message: "上传并读取年份",
+      progress: 18
+    });
 
     try {
       const formData = new FormData();
       formData.append("file", item.file);
       formData.append("modifiedAt", String(item.file.lastModified));
+      updateItem(item.id, { message: "生成缩略图", progress: 42 });
 
       const response = await fetch("/api/photos/process", {
         method: "POST",
         body: formData
       });
       const payload = await response.json();
+      updateItem(item.id, { message: "分析风格模板", progress: 76 });
 
       if (!response.ok) {
         throw new Error(payload.error ?? "图片处理失败");
       }
 
       const processed = payload as ProcessedPhotoResponse;
+      updateItem(item.id, { message: "写入年度归档", progress: 92 });
 
       updateItem(item.id, {
         status: "processed",
         message: "已生成风格模板",
+        progress: 100,
         thumbnailUrl: processed.thumbnailUrl,
         resolvedYear: processed.resolvedYear,
         capturedAt: processed.capturedAt,
@@ -258,7 +315,8 @@ export function UploadPanel() {
     } catch (error) {
       updateItem(item.id, {
         status: "error",
-        message: error instanceof Error ? error.message : "图片处理失败"
+        message: error instanceof Error ? error.message : "图片处理失败",
+        progress: 100
       });
     }
   }
@@ -278,7 +336,8 @@ function validateFile(file: File): SelectedPhoto {
       size: file.size,
       type: file.type,
       status: "error",
-      message: "格式不支持"
+      message: "格式不支持",
+      progress: 100
     };
   }
 
@@ -289,7 +348,8 @@ function validateFile(file: File): SelectedPhoto {
       size: file.size,
       type: file.type,
       status: "error",
-      message: "超过 20MB"
+      message: "超过 20MB",
+      progress: 100
     };
   }
 
@@ -300,8 +360,32 @@ function validateFile(file: File): SelectedPhoto {
     size: file.size,
     type: file.type,
     status: "ready",
-    message: "待处理"
+    message: "待处理",
+    progress: 5
   };
+}
+
+function StatusLabel({ item }: { item: SelectedPhoto }) {
+  if (item.status === "processing") {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs text-paper-muted">
+        <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" />
+        {item.message}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={
+        item.status === "error"
+          ? "text-xs text-[#e9a38f]"
+          : "text-xs text-paper-muted"
+      }
+    >
+      {item.message}
+    </span>
+  );
 }
 
 function formatYearSource(source: SelectedPhoto["yearSource"]) {
