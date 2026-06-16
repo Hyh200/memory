@@ -8,9 +8,9 @@ import type {
 } from "./album-model";
 
 const owner: User = {
-  id: "user_hao",
-  displayName: "韩宇浩",
-  signatureName: "宇浩",
+  id: "user_xie",
+  displayName: "谢淑琴",
+  signatureName: "谢淑琴",
   createdAt: "2026-06-15T08:00:00.000Z"
 };
 

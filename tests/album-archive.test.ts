@@ -3,6 +3,7 @@ import test from "node:test";
 import type { AlbumYearView } from "../src/lib/album-model";
 import {
   createAlbumYearCards,
+  filterAlbumCardsByYear,
   groupArchivedPhotosByYear,
   type ArchivedPhoto
 } from "../src/lib/album-archive";
@@ -61,6 +62,18 @@ test("createAlbumYearCards applies uploaded photo style to yearly cards", () => 
   assert.equal(card.tone, "自然风景");
   assert.deepEqual(card.dominantColors, ["#4f7d56", "#91aa90", "#26342a"]);
   assert.match(card.summary, /适合自然风景风格/);
+});
+
+test("filterAlbumCardsByYear keeps only the requested year", () => {
+  const cards = createAlbumYearCards(
+    [createSeedAlbum(2026), createSeedAlbum(2025)],
+    []
+  );
+
+  assert.deepEqual(
+    filterAlbumCardsByYear(cards, 2026).map((card) => card.year),
+    [2026]
+  );
 });
 
 function createArchivedPhoto(

@@ -8,16 +8,15 @@ import {
 import type { AlbumYearView } from "../src/lib/album-model";
 import type { ArchivedPhoto } from "../src/lib/album-archive";
 
-test("createReaderPages builds cover, uploaded photos, seed photos, and closing page", () => {
+test("createReaderPages builds cover, uploaded photos, and seed photos", () => {
   const pages = createReaderPages(createSeedAlbum(2026), [
     createArchivedPhoto("uploaded_a", 2026)
   ]);
 
-  assert.equal(pages.length, 4);
+  assert.equal(pages.length, 3);
   assert.equal(pages[0].kind, "cover");
   assert.equal(pages[1].id, "archive_uploaded_a");
   assert.equal(pages[2].id, "seed_photo");
-  assert.equal(pages[3].kind, "closing");
   assert.equal(pages[0].signatureText, "宇浩");
 });
 

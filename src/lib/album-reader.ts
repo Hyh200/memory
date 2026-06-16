@@ -55,17 +55,7 @@ export function createReaderPages(
       signatureText,
       palette
     },
-    ...photoPages,
-    {
-      id: `${albumYear.album.id}_closing`,
-      kind: "closing",
-      year: albumYear.album.year,
-      title: "本册完",
-      subtitle: `${albumYear.album.year} · ${photoPages.length} 张照片`,
-      imageUrl: null,
-      signatureText,
-      palette
-    }
+    ...photoPages
   ];
 }
 

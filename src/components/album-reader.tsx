@@ -299,38 +299,34 @@ function ReaderPaper({
     <article
       className={
         side === "right"
-          ? "hidden min-h-[34rem] border-l border-[#d8cfc2]/30 bg-paper p-5 text-ink md:flex md:flex-col md:justify-between"
-          : "flex min-h-[34rem] flex-col justify-between bg-paper p-5 text-ink"
+          ? "hidden min-h-[34rem] border-l border-[#d8cfc2]/30 bg-paper p-5 text-ink md:flex md:flex-col"
+          : "flex min-h-[34rem] flex-col bg-paper p-5 text-ink"
       }
       style={getPaperStyle(page)}
     >
-      <div className="flex items-start justify-between gap-4">
-        <span className="text-sm text-ink/55">{page.kind}</span>
-        <span className="text-sm text-ink/55">{page.year}</span>
-      </div>
-
-      <div className="grid flex-1 place-items-center py-8">
-        <div className="w-full max-w-md">
-          <div
-            className="flex aspect-[4/3] items-center justify-center overflow-hidden border border-ink/10 bg-[#e5ded2]"
-            style={getImageStyle(page)}
+      <div className="grid flex-1 place-items-center">
+        {page.kind === "cover" ? (
+          <p
+            className="text-6xl leading-none md:text-7xl"
+            style={signatureStyle}
           >
-            {page.imageUrl ? null : (
-              <span className="text-xs uppercase tracking-[0.24em] text-ink/35">
-                Annual Album
-              </span>
-            )}
+            {page.signatureText}
+          </p>
+        ) : (
+          <div className="h-full w-full">
+            <div
+              className="flex h-full min-h-[30rem] items-center justify-center overflow-hidden bg-[#e5ded2]"
+              style={getImageStyle(page)}
+            >
+              {page.imageUrl ? null : (
+                <span className="text-xs uppercase tracking-[0.24em] text-ink/35">
+                  Annual Album
+                </span>
+              )}
+            </div>
           </div>
-          <h2 className="mt-7 text-3xl font-medium tracking-normal">
-            {page.title}
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-ink/62">{page.subtitle}</p>
-        </div>
+        )}
       </div>
-
-      <p className="text-right text-5xl leading-none" style={signatureStyle}>
-        {page.signatureText}
-      </p>
     </article>
   );
 }

@@ -133,6 +133,13 @@ export function createAlbumYearCards(
   return cards.sort((left, right) => right.year - left.year);
 }
 
+export function filterAlbumCardsByYear(
+  cards: AlbumYearCard[],
+  year: number
+) {
+  return cards.filter((card) => card.year === year);
+}
+
 export function groupArchivedPhotosByYear(photos: ArchivedPhoto[]) {
   const grouped = new Map<number, ArchivedPhoto[]>();
 
