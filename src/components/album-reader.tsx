@@ -2,7 +2,14 @@
 
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Home } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Home,
+  Link2,
+  XCircle
+} from "lucide-react";
 import type { ArchivedPhoto } from "@/lib/album-archive";
 import { loadArchivedPhotos } from "@/lib/album-archive";
 import type { AlbumYearView } from "@/lib/album-model";
@@ -14,17 +21,28 @@ import {
 
 type AlbumReaderProps = {
   albumYear: AlbumYearView;
+  canShare?: boolean;
 };
 
 type FlipDirection = "previous" | "next";
 
-export function AlbumReader({ albumYear }: AlbumReaderProps) {
+type ShareState = {
+  token: string;
+  managementToken: string;
+  url: string;
+  revokedAt: string | null;
+};
+
+export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   const [archivedPhotos, setArchivedPhotos] = useState<ArchivedPhoto[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [isSinglePage, setIsSinglePage] = useState(false);
   const [flipDirection, setFlipDirection] = useState<FlipDirection | null>(
     null
   );
+  const [share, setShare] = useState<ShareState | null>(null);
+  const [shareMessage, setShareMessage] = useState("尚未生成分享链接");
+  const [isShareBusy, setIsShareBusy] = useState(false);
   const pages = useMemo(
     () => createReaderPages(albumYear, archivedPhotos),
     [albumYear, archivedPhotos]
@@ -72,6 +90,83 @@ export function AlbumReader({ albumYear }: AlbumReaderProps) {
     }, 260);
   }
 
+  async function createShareLink() {
+    setIsShareBusy(true);
+    setShareMessage("正在生成分享链接");
+
+    try {
+      const response = await fetch("/api/shares", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ year: albumYear.album.year })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "分享链接生成失败");
+      }
+
+      const url = `${window.location.origin}/share/${payload.token}`;
+      setShare({
+        token: payload.token,
+        managementToken: payload.managementToken,
+        url,
+        revokedAt: payload.revokedAt
+      });
+      setShareMessage("分享链接已生成");
+    } catch (error) {
+      setShareMessage(error instanceof Error ? error.message : "分享链接生成失败");
+    } finally {
+      setIsShareBusy(false);
+    }
+  }
+
+  async function copyShareLink() {
+    if (!share || share.revokedAt) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(share.url);
+      setShareMessage("分享链接已复制");
+    } catch {
+      setShareMessage("浏览器暂不允许自动复制，请手动复制链接");
+    }
+  }
+
+  async function revokeShareLink() {
+    if (!share) {
+      return;
+    }
+
+    setIsShareBusy(true);
+    setShareMessage("正在撤销分享链接");
+
+    try {
+      const response = await fetch(`/api/shares/${share.token}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ managementToken: share.managementToken })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "分享链接撤销失败");
+      }
+
+      setShare({ ...share, revokedAt: payload.revokedAt });
+      setShareMessage("分享链接已撤销");
+    } catch (error) {
+      setShareMessage(error instanceof Error ? error.message : "分享链接撤销失败");
+    } finally {
+      setIsShareBusy(false);
+    }
+  }
+
   return (
     <section className="min-h-screen bg-[#0f0e0c] px-4 py-5 text-paper md:px-8 md:py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
@@ -88,6 +183,49 @@ export function AlbumReader({ albumYear }: AlbumReaderProps) {
             {pageIndex + 1} / {pages.length}
           </p>
         </header>
+
+        {canShare ? (
+          <section className="grid gap-3 border border-line bg-[#171511] p-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="min-w-0">
+              <p className="text-sm text-paper">分享链接</p>
+              <p className="mt-2 break-all text-xs leading-5 text-stone">
+                {share?.url ?? shareMessage}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                className="inline-flex h-10 items-center justify-center border border-line text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={isShareBusy}
+                title="生成分享链接"
+                type="button"
+                onClick={createShareLink}
+              >
+                <Link2 aria-hidden="true" className="h-4 w-4" />
+              </button>
+              <button
+                className="inline-flex h-10 items-center justify-center border border-line text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={!share || Boolean(share.revokedAt)}
+                title="复制分享链接"
+                type="button"
+                onClick={copyShareLink}
+              >
+                <Copy aria-hidden="true" className="h-4 w-4" />
+              </button>
+              <button
+                className="inline-flex h-10 items-center justify-center border border-line text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                disabled={!share || Boolean(share.revokedAt) || isShareBusy}
+                title="撤销分享链接"
+                type="button"
+                onClick={revokeShareLink}
+              >
+                <XCircle aria-hidden="true" className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-xs text-paper-muted md:col-span-2">
+              {shareMessage}
+            </p>
+          </section>
+        ) : null}
 
         <div className="flex justify-center">
           <div
