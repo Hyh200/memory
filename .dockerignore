@@ -1,27 +1,22 @@
-# dependencies
 node_modules
-
-# Next.js
 .next
 out
+build
 tsconfig.tsbuildinfo
 
-# production
-build
+.git
+.gitignore
 
-# local env
 .env
 .env*.local
 .env.production
 .env.production.local
 
-# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# OS/editor
-.DS_Store
-Thumbs.db
-.vscode
+Dockerfile
+docker-compose*.yml
+*.md
