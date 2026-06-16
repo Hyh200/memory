@@ -172,11 +172,8 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-stone">
-              Album Reader
-            </p>
-            <h1 className="mt-2 text-2xl font-medium tracking-normal md:text-3xl">
-              {albumYear.album.year} · {albumYear.album.title}
+            <h1 className="text-2xl font-medium tracking-normal md:text-3xl">
+              {albumYear.album.year}
             </h1>
           </div>
           <p className="text-sm text-paper-muted">

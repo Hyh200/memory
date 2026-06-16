@@ -38,10 +38,10 @@ export function AlbumYearList({ seedAlbums }: AlbumYearListProps) {
           key={album.id}
         >
           <div
-            className="relative flex min-h-64 overflow-hidden bg-ink p-5 shadow-[inset_0_0_0_1px_rgba(244,239,231,0.16)]"
+            className="relative flex min-h-64 items-center justify-center overflow-hidden bg-ink p-5 shadow-[inset_0_0_0_1px_rgba(244,239,231,0.16)]"
           >
             <p
-              className="relative ml-auto mt-auto text-5xl leading-none text-paper drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]"
+              className="relative text-5xl leading-none text-paper drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]"
               style={signatureStyle}
             >
               {album.signatureText}
@@ -50,16 +50,8 @@ export function AlbumYearList({ seedAlbums }: AlbumYearListProps) {
           <div className="mt-6 flex flex-col justify-between border-t border-line px-2 pt-5 lg:mt-0 lg:border-l lg:border-t-0 lg:px-0 lg:pl-6 lg:pt-0">
             <div>
               <h2 className="text-xl font-medium tracking-normal">
-                {album.title}
+                {album.year}
               </h2>
-              <p className="mt-3 text-sm leading-6 text-stone">
-                {album.photoCount} 张照片。{album.summary}
-              </p>
-              {album.uploadedCount > 0 ? (
-                <p className="mt-3 text-xs text-paper-muted">
-                  本地新增 {album.uploadedCount} 张
-                </p>
-              ) : null}
             </div>
             <Link
               className="mt-8 w-fit text-sm text-paper-muted underline decoration-line underline-offset-4 transition group-hover:text-paper"
