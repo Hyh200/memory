@@ -69,3 +69,4 @@
 - T12 开始：补充 Docker 部署配置、环境变量示例、上线说明和健康检查，不引入真实密钥。
 - T12 审查通过：已补充云服务器 Docker Compose 部署、Next standalone 构建配置、环境变量示例、健康检查和上线文档；测试、类型检查、构建、Compose 解析和 Docker 镜像构建通过。
 - 计划内 MVP task 已全部完成；下一步可按部署文档在云服务器实际上线。
+- T12-Flexus 补充：根据本地华为云 Flexus L 宝塔面板最佳实践 HTML，重写上线文档为 Flexus L + 宝塔应用镜像路径，明确安全组、宝塔初始化、Docker Compose、宝塔反代 HTTPS、MinIO Console 隧道和备份回滚。
