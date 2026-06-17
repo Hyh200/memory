@@ -71,11 +71,17 @@ export function getNextReaderIndex({
 }: {
   currentIndex: number;
   pageCount: number;
-  direction: "first" | "previous" | "next";
+  direction: "first" | "previous" | "next" | "last";
   isSinglePage: boolean;
 }) {
   if (direction === "first") {
     return 0;
+  }
+
+  const lastStartIndex = getLastReaderStartIndex(pageCount, isSinglePage);
+
+  if (direction === "last") {
+    return lastStartIndex;
   }
 
   const step = getReaderStep(isSinglePage);
@@ -84,7 +90,6 @@ export function getNextReaderIndex({
     return Math.max(0, currentIndex - step);
   }
 
-  const lastStartIndex = getLastReaderStartIndex(pageCount, isSinglePage);
   return Math.min(lastStartIndex, currentIndex + step);
 }
 

@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  GalleryHorizontalEnd,
   Home,
   Link2,
   XCircle
@@ -82,7 +83,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
     };
   }, []);
 
-  function go(direction: "first" | "previous" | "next") {
+  function go(direction: "first" | "previous" | "next" | "last") {
     const nextIndex = getNextReaderIndex({
       currentIndex: pageIndex,
       pageCount: pages.length,
@@ -253,7 +254,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <nav
           aria-label="相册翻页控制"
-          className="grid grid-cols-3 gap-3 border-t border-[#f4efe7]/14 pt-4"
+          className="grid grid-cols-2 gap-3 border-t border-[#f4efe7]/14 pt-4 md:grid-cols-4"
         >
           <button
             className="inline-flex h-11 items-center justify-center gap-2 border border-[#f4efe7]/12 bg-[#171511]/42 text-sm text-[#8f8578] transition hover:border-[#f4efe7]/35 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
@@ -281,6 +282,15 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
           >
             下一页
             <ChevronRight aria-hidden="true" className="h-4 w-4" />
+          </button>
+          <button
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#f4efe7]/12 bg-[#171511]/42 text-sm text-[#8f8578] transition hover:border-[#f4efe7]/35 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
+            disabled={atLastPage}
+            type="button"
+            onClick={() => go("last")}
+          >
+            尾页
+            <GalleryHorizontalEnd aria-hidden="true" className="h-4 w-4" />
           </button>
         </nav>
       </div>
@@ -379,10 +389,10 @@ const signatureStyle: CSSProperties = {
 
 const coverMaterialStyle: CSSProperties = {
   backgroundImage:
-    "linear-gradient(0deg, rgba(44,37,27,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(44,37,27,0.026) 1px, transparent 1px), radial-gradient(circle at 50% 45%, rgba(255,255,255,0.28), transparent 34%)",
-  backgroundSize: "13px 13px, 17px 17px, 100% 100%",
+    "radial-gradient(circle at 50% 44%, rgba(255,255,255,0.34), transparent 36%), linear-gradient(135deg, rgba(255,255,255,0.18), transparent 42%, rgba(91,98,80,0.08))",
+  backgroundSize: "100% 100%, 100% 100%",
   mixBlendMode: "multiply",
-  opacity: 0.58
+  opacity: 0.52
 };
 
 const coverSpineStyle: CSSProperties = {

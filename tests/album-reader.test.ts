@@ -73,6 +73,24 @@ test("reader navigation uses single-page and double-page steps", () => {
     }),
     0
   );
+  assert.equal(
+    getNextReaderIndex({
+      currentIndex: 0,
+      pageCount: 5,
+      direction: "last",
+      isSinglePage: true
+    }),
+    4
+  );
+  assert.equal(
+    getNextReaderIndex({
+      currentIndex: 0,
+      pageCount: 4,
+      direction: "last",
+      isSinglePage: false
+    }),
+    2
+  );
 });
 
 function createArchivedPhoto(id: string, resolvedYear: number): ArchivedPhoto {
