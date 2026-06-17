@@ -21,28 +21,16 @@ export function createReaderPages(
   );
   const palette = albumYear.styleProfile.dominantColors;
   const signatureText = albumYear.coverAsset.signatureText;
-  const photoPages = [
-    ...uploaded.map((photo) => ({
-      id: `archive_${photo.id}`,
-      kind: "photo" as const,
-      year: albumYear.album.year,
-      title: photo.fileName,
-      subtitle: formatPhotoSubtitle(photo.width, photo.height),
-      imageUrl: getArchivedPhotoImageUrl(photo),
-      signatureText,
-      palette
-    })),
-    ...albumYear.photos.map((photo) => ({
-      id: photo.id,
-      kind: "photo" as const,
-      year: albumYear.album.year,
-      title: photo.fileName,
-      subtitle: photo.tags.length > 0 ? photo.tags.join(" / ") : "年度照片",
-      imageUrl: photo.originalUrl,
-      signatureText,
-      palette
-    }))
-  ];
+  const photoPages = uploaded.map((photo) => ({
+    id: `archive_${photo.id}`,
+    kind: "photo" as const,
+    year: albumYear.album.year,
+    title: photo.fileName,
+    subtitle: formatPhotoSubtitle(photo.width, photo.height),
+    imageUrl: getArchivedPhotoImageUrl(photo),
+    signatureText,
+    palette
+  }));
 
   return [
     {

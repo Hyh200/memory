@@ -83,6 +83,20 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    setPageIndex((currentIndex) =>
+      Math.min(
+        currentIndex,
+        getNextReaderIndex({
+          currentIndex,
+          pageCount: pages.length,
+          direction: "last",
+          isSinglePage
+        })
+      )
+    );
+  }, [pages.length]);
+
   function go(direction: "first" | "previous" | "next" | "last") {
     const nextIndex = getNextReaderIndex({
       currentIndex: pageIndex,
