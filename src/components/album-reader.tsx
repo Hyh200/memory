@@ -179,9 +179,9 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   }
 
   return (
-    <section className="min-h-screen bg-[linear-gradient(135deg,#ece7dc_0%,#d9ded3_46%,#c4c9bd_100%)] px-4 py-5 text-[#211d18] md:px-8 md:py-8">
+    <section className="min-h-screen bg-[radial-gradient(circle_at_50%_8%,rgba(72,65,54,0.34),transparent_34%),linear-gradient(135deg,#171511_0%,#0d0c0a_54%,#1f1b15_100%)] px-4 py-5 text-[#f4efe7] md:px-8 md:py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#2c251b]/15 pb-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f4efe7]/14 pb-4">
           <div>
             <h1 className="text-2xl font-medium tracking-normal md:text-3xl">
               {albumYear.album.year}
@@ -190,16 +190,16 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
         </header>
 
         {canShare ? (
-          <section className="grid gap-3 border border-[#2c251b]/12 bg-[#f5efe5]/72 p-4 shadow-[0_18px_58px_rgba(73,66,55,0.12)] backdrop-blur md:grid-cols-[1fr_auto] md:items-center">
+          <section className="grid gap-3 border border-[#f4efe7]/12 bg-[#171511]/78 p-4 shadow-[0_22px_70px_rgba(0,0,0,0.34)] backdrop-blur md:grid-cols-[1fr_auto] md:items-center">
             <div className="min-w-0">
-              <p className="text-sm text-[#211d18]">分享链接</p>
-              <p className="mt-2 break-all text-xs leading-5 text-[#756c5f]">
+              <p className="text-sm text-[#f4efe7]">分享链接</p>
+              <p className="mt-2 break-all text-xs leading-5 text-[#b5aa9b]">
                 {share?.url ?? shareMessage}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
-                className="inline-flex h-10 items-center justify-center border border-[#2c251b]/14 text-[#6f675c] transition hover:border-[#211d18]/45 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
+                className="inline-flex h-10 items-center justify-center border border-[#f4efe7]/12 text-[#b5aa9b] transition hover:border-[#f4efe7]/45 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={isShareBusy}
                 title="生成分享链接"
                 type="button"
@@ -208,7 +208,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 <Link2 aria-hidden="true" className="h-4 w-4" />
               </button>
               <button
-                className="inline-flex h-10 items-center justify-center border border-[#2c251b]/14 text-[#6f675c] transition hover:border-[#211d18]/45 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
+                className="inline-flex h-10 items-center justify-center border border-[#f4efe7]/12 text-[#b5aa9b] transition hover:border-[#f4efe7]/45 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={!share || Boolean(share.revokedAt)}
                 title="复制分享链接"
                 type="button"
@@ -217,7 +217,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 <Copy aria-hidden="true" className="h-4 w-4" />
               </button>
               <button
-                className="inline-flex h-10 items-center justify-center border border-[#2c251b]/14 text-[#6f675c] transition hover:border-[#211d18]/45 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
+                className="inline-flex h-10 items-center justify-center border border-[#f4efe7]/12 text-[#b5aa9b] transition hover:border-[#f4efe7]/45 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={!share || Boolean(share.revokedAt) || isShareBusy}
                 title="撤销分享链接"
                 type="button"
@@ -226,7 +226,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 <XCircle aria-hidden="true" className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-xs text-[#756c5f] md:col-span-2">
+            <p className="text-xs text-[#b5aa9b] md:col-span-2">
               {shareMessage}
             </p>
           </section>
@@ -234,7 +234,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <div className="flex justify-center">
           <div
-            className="relative grid w-full max-w-4xl overflow-hidden border border-[#2c251b]/12 bg-[#edf0e8]/72 p-3 shadow-[0_34px_100px_rgba(72,70,60,0.24)] md:p-4"
+            className="relative grid w-full max-w-4xl overflow-hidden border border-[#f4efe7]/12 bg-[#0f0e0c]/78 p-3 shadow-[0_34px_100px_rgba(0,0,0,0.52)] md:p-4"
             style={{ perspective: "1800px" }}
           >
             <ReaderPaper page={leftPage} />
@@ -253,10 +253,10 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <nav
           aria-label="相册翻页控制"
-          className="grid grid-cols-3 gap-3 border-t border-[#2c251b]/15 pt-4"
+          className="grid grid-cols-3 gap-3 border-t border-[#f4efe7]/14 pt-4"
         >
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 border border-[#2c251b]/12 bg-[#f5efe5]/36 text-sm text-[#6f675c] transition hover:border-[#211d18]/35 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#f4efe7]/12 bg-[#171511]/42 text-sm text-[#8f8578] transition hover:border-[#f4efe7]/35 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
             disabled={atFirstPage}
             type="button"
             onClick={() => go("first")}
@@ -265,7 +265,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
             首页
           </button>
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 border border-[#2c251b]/12 bg-[#f5efe5]/36 text-sm text-[#6f675c] transition hover:border-[#211d18]/35 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#f4efe7]/12 bg-[#171511]/42 text-sm text-[#8f8578] transition hover:border-[#f4efe7]/35 hover:text-[#f4efe7] disabled:cursor-not-allowed disabled:opacity-35"
             disabled={atFirstPage}
             type="button"
             onClick={() => go("previous")}
@@ -274,7 +274,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
             上一页
           </button>
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 border border-[#2c251b]/12 bg-[#f5efe5]/36 text-sm text-[#211d18] transition hover:border-[#211d18]/35 disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#f4efe7]/16 bg-[#171511]/42 text-sm text-[#f4efe7] transition hover:border-[#f4efe7]/45 disabled:cursor-not-allowed disabled:opacity-35"
             disabled={atLastPage}
             type="button"
             onClick={() => go("next")}
