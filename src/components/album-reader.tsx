@@ -294,16 +294,16 @@ function ReaderPaper({
   page: ReaderPage | null;
 }) {
   if (!page) {
-    return <div className="aspect-[4/3] w-full bg-[#ede5d8]" />;
+    return <div className="aspect-[4/3] w-full bg-[#15130f]" />;
   }
 
   return (
     <article
-      className="relative aspect-[4/3] w-full overflow-hidden bg-paper text-ink"
+      className="relative aspect-[4/3] w-full overflow-hidden bg-[#15130f] p-3 text-ink shadow-[0_22px_70px_rgba(63,58,49,0.22)] md:p-5"
       style={getPaperStyle(page)}
     >
       {page.kind === "cover" ? (
-        <div className="relative grid h-full w-full place-items-center overflow-hidden">
+        <div className="relative grid h-full w-full place-items-center overflow-hidden border border-[#f4efe7]/18 bg-[#e8dfd0]">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
@@ -311,7 +311,7 @@ function ReaderPaper({
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-[22px] border border-[#2c251b]/12 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.34)] md:inset-[34px]"
+            className="pointer-events-none absolute inset-[18px] border border-[#2c251b]/14 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)] md:inset-[30px]"
           />
           <div
             aria-hidden="true"
@@ -327,13 +327,13 @@ function ReaderPaper({
         </div>
       ) : (
         <div
-          className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#f1eadf] p-3 md:p-4"
+          className="relative flex h-full w-full items-center justify-center overflow-hidden border border-[#f4efe7]/18 bg-[#efe8dc] p-5 md:p-8"
           style={getImageStyle(page)}
         >
           {page.imageUrl ? (
             <img
               alt=""
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain shadow-[0_10px_32px_rgba(72,66,56,0.2)]"
               src={page.imageUrl}
             />
           ) : (
@@ -351,12 +351,12 @@ function getPaperStyle(page: ReaderPage): CSSProperties {
   return {
     backgroundImage:
       page.kind === "cover"
-        ? "radial-gradient(circle at 78% 18%, rgba(255,255,255,0.52), transparent 28%), radial-gradient(circle at 24% 72%, rgba(174,190,174,0.32), transparent 33%), linear-gradient(135deg, #efe6d8, #d7dfd4 48%, #c9c0ad)"
+        ? "linear-gradient(135deg, #1d1a16, #0f0e0c 54%, #252018)"
         : "none",
     boxShadow:
       page.kind === "cover"
-        ? "inset 0 0 0 1px rgba(44,37,27,0.12), inset 34px 0 46px rgba(75,82,67,0.18), inset -18px 0 42px rgba(255,255,255,0.32)"
-        : "inset 0 0 0 1px rgba(44,37,27,0.08)"
+        ? "inset 0 0 0 1px rgba(244,239,231,0.14), inset 22px 0 28px rgba(255,255,255,0.04), inset -18px 0 34px rgba(0,0,0,0.28)"
+        : "inset 0 0 0 1px rgba(244,239,231,0.14), inset 0 0 42px rgba(0,0,0,0.28)"
   };
 }
 
@@ -364,7 +364,7 @@ function getImageStyle(page: ReaderPage): CSSProperties {
   const [primary, secondary, shadow] = page.palette;
 
   return {
-    backgroundColor: primary ?? "#d8cfc2",
+    backgroundColor: page.imageUrl ? "#f1eadf" : primary ?? "#d8cfc2",
     backgroundImage: page.imageUrl
       ? "none"
       : `linear-gradient(135deg, ${primary ?? "#d8cfc2"}, ${
