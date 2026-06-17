@@ -179,9 +179,9 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   }
 
   return (
-    <section className="min-h-screen bg-[#0d0c0a] px-4 py-5 text-paper md:px-8 md:py-8">
+    <section className="min-h-screen bg-[linear-gradient(135deg,#ece7dc_0%,#d9ded3_46%,#c4c9bd_100%)] px-4 py-5 text-[#211d18] md:px-8 md:py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#2c251b]/15 pb-4">
           <div>
             <h1 className="text-2xl font-medium tracking-normal md:text-3xl">
               {albumYear.album.year}
@@ -190,16 +190,16 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
         </header>
 
         {canShare ? (
-          <section className="grid gap-3 border border-line bg-[#171511] p-4 md:grid-cols-[1fr_auto] md:items-center">
+          <section className="grid gap-3 border border-[#2c251b]/12 bg-[#f5efe5]/72 p-4 shadow-[0_18px_58px_rgba(73,66,55,0.12)] backdrop-blur md:grid-cols-[1fr_auto] md:items-center">
             <div className="min-w-0">
-              <p className="text-sm text-paper">分享链接</p>
-              <p className="mt-2 break-all text-xs leading-5 text-stone">
+              <p className="text-sm text-[#211d18]">分享链接</p>
+              <p className="mt-2 break-all text-xs leading-5 text-[#756c5f]">
                 {share?.url ?? shareMessage}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
-                className="inline-flex h-10 items-center justify-center border border-line text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                className="inline-flex h-10 items-center justify-center border border-[#2c251b]/14 text-[#6f675c] transition hover:border-[#211d18]/45 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={isShareBusy}
                 title="生成分享链接"
                 type="button"
@@ -208,7 +208,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 <Link2 aria-hidden="true" className="h-4 w-4" />
               </button>
               <button
-                className="inline-flex h-10 items-center justify-center border border-line text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                className="inline-flex h-10 items-center justify-center border border-[#2c251b]/14 text-[#6f675c] transition hover:border-[#211d18]/45 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={!share || Boolean(share.revokedAt)}
                 title="复制分享链接"
                 type="button"
@@ -217,7 +217,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 <Copy aria-hidden="true" className="h-4 w-4" />
               </button>
               <button
-                className="inline-flex h-10 items-center justify-center border border-line text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+                className="inline-flex h-10 items-center justify-center border border-[#2c251b]/14 text-[#6f675c] transition hover:border-[#211d18]/45 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
                 disabled={!share || Boolean(share.revokedAt) || isShareBusy}
                 title="撤销分享链接"
                 type="button"
@@ -226,7 +226,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 <XCircle aria-hidden="true" className="h-4 w-4" />
               </button>
             </div>
-            <p className="text-xs text-paper-muted md:col-span-2">
+            <p className="text-xs text-[#756c5f] md:col-span-2">
               {shareMessage}
             </p>
           </section>
@@ -234,7 +234,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <div className="flex justify-center">
           <div
-            className="relative grid w-full max-w-4xl overflow-hidden border border-line bg-[#15130f] p-3 shadow-[0_34px_100px_rgba(0,0,0,0.55)] md:p-4"
+            className="relative grid w-full max-w-4xl overflow-hidden border border-[#2c251b]/12 bg-[#edf0e8]/72 p-3 shadow-[0_34px_100px_rgba(72,70,60,0.24)] md:p-4"
             style={{ perspective: "1800px" }}
           >
             <ReaderPaper page={leftPage} />
@@ -243,8 +243,8 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
                 aria-hidden="true"
                 className={
                   flipDirection === "next"
-                    ? "absolute inset-3 origin-left animate-[album-flip-next_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)] md:inset-4"
-                    : "absolute inset-3 origin-right animate-[album-flip-prev_520ms_ease-in-out] border border-line bg-paper shadow-[0_24px_70px_rgba(0,0,0,0.46)] md:inset-4"
+                    ? "absolute inset-3 origin-left animate-[album-flip-next_520ms_ease-in-out] border border-[#2c251b]/14 bg-[#ede5d8] shadow-[0_24px_70px_rgba(72,70,60,0.24)] md:inset-4"
+                    : "absolute inset-3 origin-right animate-[album-flip-prev_520ms_ease-in-out] border border-[#2c251b]/14 bg-[#ede5d8] shadow-[0_24px_70px_rgba(72,70,60,0.24)] md:inset-4"
                 }
               />
             ) : null}
@@ -253,10 +253,10 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
         <nav
           aria-label="相册翻页控制"
-          className="grid grid-cols-3 gap-3 border-t border-line pt-4"
+          className="grid grid-cols-3 gap-3 border-t border-[#2c251b]/15 pt-4"
         >
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 border border-line text-sm text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#2c251b]/12 bg-[#f5efe5]/36 text-sm text-[#6f675c] transition hover:border-[#211d18]/35 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
             disabled={atFirstPage}
             type="button"
             onClick={() => go("first")}
@@ -265,7 +265,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
             首页
           </button>
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 border border-line text-sm text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#2c251b]/12 bg-[#f5efe5]/36 text-sm text-[#6f675c] transition hover:border-[#211d18]/35 hover:text-[#211d18] disabled:cursor-not-allowed disabled:opacity-35"
             disabled={atFirstPage}
             type="button"
             onClick={() => go("previous")}
@@ -274,7 +274,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
             上一页
           </button>
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 border border-line text-sm text-paper-muted transition hover:border-paper hover:text-paper disabled:cursor-not-allowed disabled:opacity-35"
+            className="inline-flex h-11 items-center justify-center gap-2 border border-[#2c251b]/12 bg-[#f5efe5]/36 text-sm text-[#211d18] transition hover:border-[#211d18]/35 disabled:cursor-not-allowed disabled:opacity-35"
             disabled={atLastPage}
             type="button"
             onClick={() => go("next")}
@@ -294,7 +294,7 @@ function ReaderPaper({
   page: ReaderPage | null;
 }) {
   if (!page) {
-    return <div className="aspect-[4/3] w-full bg-[#11100d]" />;
+    return <div className="aspect-[4/3] w-full bg-[#ede5d8]" />;
   }
 
   return (
@@ -311,7 +311,7 @@ function ReaderPaper({
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-[22px] border border-[#eee4d3]/18 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.28)] md:inset-[34px]"
+            className="pointer-events-none absolute inset-[22px] border border-[#2c251b]/12 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.34)] md:inset-[34px]"
           />
           <div
             aria-hidden="true"
@@ -319,7 +319,7 @@ function ReaderPaper({
             style={coverSpineStyle}
           />
           <p
-            className="relative text-[56px] leading-none text-[#f3eadb] drop-shadow-[0_10px_28px_rgba(0,0,0,0.58)] md:text-[86px]"
+            className="relative text-[56px] leading-none text-[#211d18] drop-shadow-[0_10px_28px_rgba(80,75,64,0.18)] md:text-[86px]"
             style={signatureStyle}
           >
             {page.signatureText}
@@ -327,7 +327,7 @@ function ReaderPaper({
         </div>
       ) : (
         <div
-          className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#181612] p-3 md:p-4"
+          className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#f1eadf] p-3 md:p-4"
           style={getImageStyle(page)}
         >
           {page.imageUrl ? (
@@ -351,12 +351,12 @@ function getPaperStyle(page: ReaderPage): CSSProperties {
   return {
     backgroundImage:
       page.kind === "cover"
-        ? "radial-gradient(circle at 78% 18%, rgba(255,255,255,0.08), transparent 30%), linear-gradient(135deg, #29251f, #11100d 54%, #1c1712)"
+        ? "radial-gradient(circle at 78% 18%, rgba(255,255,255,0.52), transparent 28%), radial-gradient(circle at 24% 72%, rgba(174,190,174,0.32), transparent 33%), linear-gradient(135deg, #efe6d8, #d7dfd4 48%, #c9c0ad)"
         : "none",
     boxShadow:
       page.kind === "cover"
-        ? "inset 0 0 0 1px rgba(244,239,231,0.13), inset 34px 0 46px rgba(0,0,0,0.34), inset -18px 0 42px rgba(255,255,255,0.035)"
-        : "inset 0 0 0 1px rgba(244,239,231,0.08)"
+        ? "inset 0 0 0 1px rgba(44,37,27,0.12), inset 34px 0 46px rgba(75,82,67,0.18), inset -18px 0 42px rgba(255,255,255,0.32)"
+        : "inset 0 0 0 1px rgba(44,37,27,0.08)"
   };
 }
 
@@ -379,13 +379,13 @@ const signatureStyle: CSSProperties = {
 
 const coverMaterialStyle: CSSProperties = {
   backgroundImage:
-    "linear-gradient(0deg, rgba(244,239,231,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(244,239,231,0.026) 1px, transparent 1px), radial-gradient(circle at 50% 45%, rgba(255,255,255,0.07), transparent 34%)",
+    "linear-gradient(0deg, rgba(44,37,27,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(44,37,27,0.026) 1px, transparent 1px), radial-gradient(circle at 50% 45%, rgba(255,255,255,0.28), transparent 34%)",
   backgroundSize: "13px 13px, 17px 17px, 100% 100%",
   mixBlendMode: "multiply",
-  opacity: 0.68
+  opacity: 0.58
 };
 
 const coverSpineStyle: CSSProperties = {
   backgroundImage:
-    "linear-gradient(90deg, rgba(0,0,0,0.42), rgba(0,0,0,0.13) 46%, transparent)"
+    "linear-gradient(90deg, rgba(91,98,80,0.28), rgba(91,98,80,0.1) 46%, transparent)"
 };
