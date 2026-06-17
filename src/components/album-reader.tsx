@@ -294,7 +294,7 @@ function ReaderPaper({
   page: ReaderPage | null;
 }) {
   if (!page) {
-    return <div className="aspect-[4/3] w-full bg-[#15130f]" />;
+    return <div className="aspect-[4/3] w-full bg-[#11100d]" />;
   }
 
   return (
@@ -307,10 +307,19 @@ function ReaderPaper({
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
-            style={paperTextureStyle}
+            style={coverMaterialStyle}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-[22px] border border-[#eee4d3]/18 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.28)] md:inset-[34px]"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-0 w-[12%]"
+            style={coverSpineStyle}
           />
           <p
-            className="relative text-[56px] leading-none text-[#14110d] drop-shadow-[0_8px_18px_rgba(0,0,0,0.14)] md:text-[86px]"
+            className="relative text-[56px] leading-none text-[#f3eadb] drop-shadow-[0_10px_28px_rgba(0,0,0,0.58)] md:text-[86px]"
             style={signatureStyle}
           >
             {page.signatureText}
@@ -318,13 +327,13 @@ function ReaderPaper({
         </div>
       ) : (
         <div
-          className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#efe8dc]"
+          className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#181612] p-3 md:p-4"
           style={getImageStyle(page)}
         >
           {page.imageUrl ? (
             <img
               alt=""
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
               src={page.imageUrl}
             />
           ) : (
@@ -339,17 +348,15 @@ function ReaderPaper({
 }
 
 function getPaperStyle(page: ReaderPage): CSSProperties {
-  const [primary, secondary] = page.palette;
-
   return {
     backgroundImage:
       page.kind === "cover"
-        ? `linear-gradient(135deg, ${secondary ?? "#f4efe7"}, #f5efe5 58%, ${
-            primary ?? "#d8cfc2"
-          }), linear-gradient(90deg, rgba(22,20,17,0.14), transparent 14%, transparent 86%, rgba(22,20,17,0.08))`
+        ? "radial-gradient(circle at 78% 18%, rgba(255,255,255,0.08), transparent 30%), linear-gradient(135deg, #29251f, #11100d 54%, #1c1712)"
         : "none",
     boxShadow:
-      "inset 0 0 0 1px rgba(22,20,17,0.08), inset 18px 0 34px rgba(22,20,17,0.08), inset -10px 0 26px rgba(255,255,255,0.18)"
+      page.kind === "cover"
+        ? "inset 0 0 0 1px rgba(244,239,231,0.13), inset 34px 0 46px rgba(0,0,0,0.34), inset -18px 0 42px rgba(255,255,255,0.035)"
+        : "inset 0 0 0 1px rgba(244,239,231,0.08)"
   };
 }
 
@@ -370,10 +377,15 @@ const signatureStyle: CSSProperties = {
   fontFamily: '"STXingkai", "华文行楷", "KaiTi", "楷体", serif'
 };
 
-const paperTextureStyle: CSSProperties = {
+const coverMaterialStyle: CSSProperties = {
   backgroundImage:
-    "linear-gradient(0deg, rgba(22,20,17,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(22,20,17,0.025) 1px, transparent 1px)",
-  backgroundSize: "28px 28px, 32px 32px",
+    "linear-gradient(0deg, rgba(244,239,231,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(244,239,231,0.026) 1px, transparent 1px), radial-gradient(circle at 50% 45%, rgba(255,255,255,0.07), transparent 34%)",
+  backgroundSize: "13px 13px, 17px 17px, 100% 100%",
   mixBlendMode: "multiply",
-  opacity: 0.42
+  opacity: 0.68
+};
+
+const coverSpineStyle: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(90deg, rgba(0,0,0,0.42), rgba(0,0,0,0.13) 46%, transparent)"
 };
