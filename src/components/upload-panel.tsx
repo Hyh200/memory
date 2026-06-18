@@ -337,7 +337,7 @@ export function UploadPanel() {
 function validateFile(file: File): SelectedPhoto {
   if (!acceptedTypes.has(file.type)) {
     return {
-      id: crypto.randomUUID(),
+      id: createClientId(),
       name: file.name,
       size: file.size,
       type: file.type,
@@ -349,7 +349,7 @@ function validateFile(file: File): SelectedPhoto {
 
   if (file.size > maxFileSize) {
     return {
-      id: crypto.randomUUID(),
+      id: createClientId(),
       name: file.name,
       size: file.size,
       type: file.type,
@@ -360,7 +360,7 @@ function validateFile(file: File): SelectedPhoto {
   }
 
   return {
-    id: crypto.randomUUID(),
+    id: createClientId(),
     file,
     name: file.name,
     size: file.size,
@@ -369,6 +369,24 @@ function validateFile(file: File): SelectedPhoto {
     message: "待处理",
     progress: 5
   };
+}
+
+function createClientId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.getRandomValues === "function"
+  ) {
+    const values = new Uint32Array(4);
+    crypto.getRandomValues(values);
+    return Array.from(values, (value) => value.toString(16).padStart(8, "0"))
+      .join("-");
+  }
+
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
 
 function StatusLabel({ item }: { item: SelectedPhoto }) {
