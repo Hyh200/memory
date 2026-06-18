@@ -8,6 +8,7 @@ export type ReaderPage = {
   title: string;
   subtitle: string;
   imageUrl: string | null;
+  placeholderUrl: string | null;
   signatureText: string;
   palette: string[];
 };
@@ -28,6 +29,7 @@ export function createReaderPages(
     title: photo.fileName,
     subtitle: formatPhotoSubtitle(photo.width, photo.height),
     imageUrl: getArchivedPhotoImageUrl(photo),
+    placeholderUrl: photo.thumbnailUrl,
     signatureText,
     palette
   }));
@@ -40,6 +42,7 @@ export function createReaderPages(
       title: albumYear.album.title,
       subtitle: albumYear.styleProfile.summary,
       imageUrl: albumYear.coverAsset.imageUrl,
+      placeholderUrl: null,
       signatureText,
       palette
     },

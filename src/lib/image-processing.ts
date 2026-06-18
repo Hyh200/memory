@@ -5,7 +5,7 @@ import { analyzeImageStyle, type StyleAnalysis } from "./style-analysis";
 
 const acceptedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const thumbnailSize = 360;
-const displayMaxSize = 2048;
+const displayMaxSize = 1280;
 
 export type YearSource = "exif" | "modifiedAt" | "uploadedAt";
 
@@ -73,7 +73,7 @@ export async function processImageUpload({
       fit: "inside",
       withoutEnlargement: true
     })
-    .webp({ quality: 82 })
+    .webp({ quality: 74, effort: 4 })
     .toBuffer({ resolveWithObject: true });
 
   return {

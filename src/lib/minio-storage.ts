@@ -161,6 +161,26 @@ export async function getObjectFromMinio(key: string) {
   };
 }
 
+export async function getObjectStreamFromMinio(key: string) {
+  const config = getMinioConfig();
+  const client = createMinioClient(config);
+  await ensureBucket(client, config.bucket);
+
+  const response = await client.send(
+    new GetObjectCommand({
+      Bucket: config.bucket,
+      Key: key
+    })
+  );
+
+  return {
+    body: response.Body,
+    contentLength: response.ContentLength,
+    contentType: response.ContentType ?? "application/octet-stream",
+    etag: response.ETag
+  };
+}
+
 export function getMinioConfig() {
   const accessKeyId = process.env.MINIO_ACCESS_KEY;
   const secretAccessKey = process.env.MINIO_SECRET_KEY;

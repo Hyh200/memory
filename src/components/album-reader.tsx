@@ -70,12 +70,9 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
     }) === pageIndex;
   const preloadImageUrls = useMemo(() => {
     const urls: string[] = [];
+    const indexes = [pageIndex + 1, pageIndex - 1, pageIndex + 2];
 
-    for (
-      let index = pageIndex + 1;
-      index < pages.length && urls.length < 2;
-      index += 1
-    ) {
+    for (const index of indexes) {
       const imageUrl = pages[index]?.imageUrl;
 
       if (imageUrl && !urls.includes(imageUrl)) {
@@ -83,7 +80,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
       }
     }
 
-    return urls;
+    return urls.slice(0, 3);
   }, [pageIndex, pages]);
   const canPreloadNextImages =
     leftPage?.kind !== "photo" ||
@@ -390,7 +387,11 @@ function ReaderPaper({
           style={getImageStyle(page)}
         >
           {page.imageUrl ? (
-            <ReaderImage src={page.imageUrl} onLoad={onImageLoad} />
+            <ReaderImage
+              placeholderSrc={page.placeholderUrl}
+              src={page.imageUrl}
+              onLoad={onImageLoad}
+            />
           ) : (
             <span className="text-xs uppercase text-ink/35">
               Annual Album
@@ -403,54 +404,37 @@ function ReaderPaper({
 }
 
 function ReaderImage({
+  placeholderSrc,
   src,
   onLoad
 }: {
+  placeholderSrc: string | null;
   src: string;
   onLoad: (src: string) => void;
 }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   );
-  const [displaySrc, setDisplaySrc] = useState<string | null>(() =>
-    getCachedImageObjectUrl(src)
-  );
+  const [displaySrc, setDisplaySrc] = useState(() => getImageDisplaySrc(src));
 
   useEffect(() => {
-    let cancelled = false;
-    const cachedSrc = getCachedImageObjectUrl(src);
-
     setStatus("loading");
-    setDisplaySrc(cachedSrc);
-
-    if (cachedSrc) {
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    loadImageIntoMemoryCache(src)
-      .then((objectUrl) => {
-        if (!cancelled) {
-          setDisplaySrc(objectUrl);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setStatus("error");
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    setDisplaySrc(getImageDisplaySrc(src));
   }, [src]);
 
   return (
     <>
       {status !== "loaded" ? (
         <div className="absolute inset-5 grid place-items-center bg-[#efe8dc] text-xs uppercase tracking-normal text-ink/35 md:inset-8">
-          {status === "error" ? "Image unavailable" : "Loading"}
+          {placeholderSrc ? (
+            <img
+              alt=""
+              className="h-full w-full object-contain opacity-70 blur-sm scale-[1.02]"
+              src={placeholderSrc}
+            />
+          ) : (
+            <span>{status === "error" ? "Image unavailable" : "Loading"}</span>
+          )}
         </div>
       ) : null}
       {displaySrc ? (
@@ -503,6 +487,10 @@ function getCachedImageObjectUrl(src: string) {
 
   cached.lastUsed = Date.now();
   return cached.objectUrl;
+}
+
+function getImageDisplaySrc(src: string) {
+  return getCachedImageObjectUrl(src) ?? src;
 }
 
 async function loadImageIntoMemoryCache(src: string) {
