@@ -46,6 +46,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   const [share, setShare] = useState<ShareState | null>(null);
   const [shareMessage, setShareMessage] = useState("尚未生成分享链接");
   const [isShareBusy, setIsShareBusy] = useState(false);
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
   const pages = useMemo(
     () => createReaderPages(albumYear, archivedPhotos),
     [albumYear, archivedPhotos]
@@ -60,16 +61,27 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
       direction: "next",
       isSinglePage
     }) === pageIndex;
-  const nextImageUrl = useMemo(() => {
-    const nextIndex = getNextReaderIndex({
-      currentIndex: pageIndex,
-      pageCount: pages.length,
-      direction: "next",
-      isSinglePage
-    });
+  const preloadImageUrls = useMemo(() => {
+    const urls: string[] = [];
 
-    return nextIndex === pageIndex ? null : pages[nextIndex]?.imageUrl ?? null;
-  }, [isSinglePage, pageIndex, pages]);
+    for (
+      let index = pageIndex + 1;
+      index < pages.length && urls.length < 2;
+      index += 1
+    ) {
+      const imageUrl = pages[index]?.imageUrl;
+
+      if (imageUrl && !urls.includes(imageUrl)) {
+        urls.push(imageUrl);
+      }
+    }
+
+    return urls;
+  }, [pageIndex, pages]);
+  const canPreloadNextImages =
+    leftPage?.kind !== "photo" ||
+    !leftPage.imageUrl ||
+    loadedImageUrl === leftPage.imageUrl;
 
   useEffect(() => {
     let cancelled = false;
@@ -106,15 +118,6 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
       )
     );
   }, [pages.length]);
-
-  useEffect(() => {
-    if (!nextImageUrl || typeof window === "undefined") {
-      return;
-    }
-
-    const image = new window.Image();
-    image.src = nextImageUrl;
-  }, [nextImageUrl]);
 
   function go(direction: "first" | "previous" | "next" | "last") {
     const nextIndex = getNextReaderIndex({
@@ -214,6 +217,7 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 
   return (
     <section className="min-h-screen bg-[radial-gradient(circle_at_50%_8%,rgba(72,65,54,0.34),transparent_34%),linear-gradient(135deg,#171511_0%,#0d0c0a_54%,#1f1b15_100%)] px-4 py-5 text-[#f4efe7] md:px-8 md:py-8">
+      <ImagePreloader enabled={canPreloadNextImages} urls={preloadImageUrls} />
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f4efe7]/14 pb-4">
           <div>
@@ -271,7 +275,10 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
             className="relative grid w-full max-w-4xl overflow-hidden border border-[#f4efe7]/12 bg-[#0f0e0c]/78 p-3 shadow-[0_34px_100px_rgba(0,0,0,0.52)] md:p-4"
             style={{ perspective: "1800px" }}
           >
-            <ReaderPaper page={leftPage} />
+            <ReaderPaper
+              page={leftPage}
+              onImageLoad={(src) => setLoadedImageUrl(src)}
+            />
             {flipDirection ? (
               <div
                 aria-hidden="true"
@@ -332,9 +339,11 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
 }
 
 function ReaderPaper({
-  page
+  page,
+  onImageLoad
 }: {
   page: ReaderPage | null;
+  onImageLoad: (src: string) => void;
 }) {
   if (!page) {
     return <div className="aspect-[4/3] w-full bg-[#15130f]" />;
@@ -374,7 +383,7 @@ function ReaderPaper({
           style={getImageStyle(page)}
         >
           {page.imageUrl ? (
-            <ReaderImage src={page.imageUrl} />
+            <ReaderImage src={page.imageUrl} onLoad={onImageLoad} />
           ) : (
             <span className="text-xs uppercase text-ink/35">
               Annual Album
@@ -386,7 +395,13 @@ function ReaderPaper({
   );
 }
 
-function ReaderImage({ src }: { src: string }) {
+function ReaderImage({
+  src,
+  onLoad
+}: {
+  src: string;
+  onLoad: (src: string) => void;
+}) {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   );
@@ -412,9 +427,35 @@ function ReaderImage({ src }: { src: string }) {
         }
         src={src}
         onError={() => setStatus("error")}
-        onLoad={() => setStatus("loaded")}
+        onLoad={() => {
+          setStatus("loaded");
+          onLoad(src);
+        }}
       />
     </>
+  );
+}
+
+function ImagePreloader({
+  enabled,
+  urls
+}: {
+  enabled: boolean;
+  urls: string[];
+}) {
+  if (!enabled || urls.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed -bottom-4 -right-4 h-px w-px overflow-hidden opacity-0"
+    >
+      {urls.map((url) => (
+        <img alt="" key={url} src={url} />
+      ))}
+    </div>
   );
 }
 
