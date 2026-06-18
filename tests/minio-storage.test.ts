@@ -30,12 +30,18 @@ test(
       .resize({ width: 16, height: 16, fit: "cover" })
       .webp()
       .toBuffer();
+    const displayBuffer = await sharp(originalBuffer)
+      .resize({ width: 24, height: 24, fit: "inside" })
+      .webp()
+      .toBuffer();
 
     const stored = await storeProcessedPhoto({
       originalBuffer,
       originalMimeType: "image/jpeg",
       thumbnailBuffer,
       thumbnailMimeType: "image/webp",
+      displayBuffer,
+      displayMimeType: "image/webp",
       ownerId: "test-user",
       resolvedYear: 2026,
       fileName: "minio integration.jpg"
@@ -49,9 +55,12 @@ test(
       thumbnailUrl: "data:image/webp;base64,test",
       originalObjectKey: stored.originalObjectKey,
       thumbnailObjectKey: stored.thumbnailObjectKey,
+      displayObjectKey: stored.displayObjectKey,
       bucket: stored.bucket,
       width: 32,
       height: 24,
+      displayWidth: 24,
+      displayHeight: 18,
       orientation: "landscape" as const,
       capturedAt: null,
       uploadedAt: "2026-06-16T00:00:00.000Z",
@@ -71,7 +80,7 @@ test(
       }
     });
 
-    const [originalHead, thumbnailHead] = await Promise.all([
+    const [originalHead, thumbnailHead, displayHead] = await Promise.all([
       client.send(
         new HeadObjectCommand({
           Bucket: stored.bucket,
@@ -83,6 +92,12 @@ test(
           Bucket: stored.bucket,
           Key: stored.thumbnailObjectKey
         })
+      ),
+      client.send(
+        new HeadObjectCommand({
+          Bucket: stored.bucket,
+          Key: stored.displayObjectKey
+        })
       )
     ]);
 
@@ -90,8 +105,10 @@ test(
     assert.match(stored.photoId, /^[0-9a-f-]{36}$/);
     assert.equal(originalHead.ContentType, "image/jpeg");
     assert.equal(thumbnailHead.ContentType, "image/webp");
+    assert.equal(displayHead.ContentType, "image/webp");
     assert.match(stored.originalObjectKey, /^users\/test-user\/years\/2026\//);
     assert.match(stored.thumbnailObjectKey, /\/thumb\/thumbnail\.webp$/);
+    assert.match(stored.displayObjectKey, /\/display\/display\.webp$/);
     assert.ok(archive.some((photo) => photo.id === stored.photoId));
   }
 );

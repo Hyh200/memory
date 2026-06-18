@@ -12,9 +12,12 @@ export type ArchivedPhoto = {
   thumbnailUrl: string;
   originalObjectKey: string;
   thumbnailObjectKey: string;
+  displayObjectKey?: string;
   bucket: string;
   width: number;
   height: number;
+  displayWidth?: number;
+  displayHeight?: number;
   orientation: PhotoOrientation;
   capturedAt: string | null;
   uploadedAt: string;

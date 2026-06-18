@@ -5,6 +5,7 @@ import { analyzeImageStyle, type StyleAnalysis } from "./style-analysis";
 
 const acceptedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const thumbnailSize = 360;
+const displayMaxSize = 2048;
 
 export type YearSource = "exif" | "modifiedAt" | "uploadedAt";
 
@@ -21,6 +22,10 @@ export type ProcessedImage = {
   thumbnailMimeType: "image/webp";
   thumbnailWidth: number;
   thumbnailHeight: number;
+  displayBuffer: Buffer;
+  displayMimeType: "image/webp";
+  displayWidth: number;
+  displayHeight: number;
   width: number;
   height: number;
   orientation: PhotoOrientation;
@@ -60,6 +65,16 @@ export async function processImageUpload({
     })
     .webp({ quality: 78 })
     .toBuffer({ resolveWithObject: true });
+  const { data: displayBuffer, info: displayInfo } = await sharp(buffer)
+    .rotate()
+    .resize({
+      width: displayMaxSize,
+      height: displayMaxSize,
+      fit: "inside",
+      withoutEnlargement: true
+    })
+    .webp({ quality: 82 })
+    .toBuffer({ resolveWithObject: true });
 
   return {
     thumbnailBuffer: data,
@@ -67,6 +82,10 @@ export async function processImageUpload({
     thumbnailMimeType: "image/webp",
     thumbnailWidth: info.width,
     thumbnailHeight: info.height,
+    displayBuffer,
+    displayMimeType: "image/webp",
+    displayWidth: displayInfo.width,
+    displayHeight: displayInfo.height,
     width: dimensions.width,
     height: dimensions.height,
     orientation: getOrientation(dimensions.width, dimensions.height),

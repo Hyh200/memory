@@ -86,7 +86,9 @@ function formatPhotoSubtitle(width: number, height: number) {
 }
 
 function getArchivedPhotoImageUrl(photo: ArchivedPhoto) {
-  return `/api/photos/object?key=${encodeURIComponent(photo.originalObjectKey)}`;
+  return `/api/photos/object?key=${encodeURIComponent(
+    photo.displayObjectKey ?? photo.originalObjectKey
+  )}`;
 }
 
 function getLastReaderStartIndex(pageCount: number, isSinglePage: boolean) {

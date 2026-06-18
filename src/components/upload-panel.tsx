@@ -51,6 +51,9 @@ type ProcessedPhotoResponse = {
   thumbnailMimeType: "image/webp";
   thumbnailWidth: number;
   thumbnailHeight: number;
+  displayObjectKey: string;
+  displayWidth: number;
+  displayHeight: number;
   width: number;
   height: number;
   orientation: "landscape" | "portrait" | "square";
@@ -308,9 +311,12 @@ export function UploadPanel() {
         thumbnailUrl: processed.thumbnailUrl,
         originalObjectKey: processed.originalObjectKey,
         thumbnailObjectKey: processed.thumbnailObjectKey,
+        displayObjectKey: processed.displayObjectKey,
         bucket: processed.bucket,
         width: processed.width,
         height: processed.height,
+        displayWidth: processed.displayWidth,
+        displayHeight: processed.displayHeight,
         orientation: processed.orientation,
         capturedAt: processed.capturedAt,
         uploadedAt: processed.uploadedAt,

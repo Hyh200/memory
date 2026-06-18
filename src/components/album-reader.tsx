@@ -60,6 +60,16 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
       direction: "next",
       isSinglePage
     }) === pageIndex;
+  const nextImageUrl = useMemo(() => {
+    const nextIndex = getNextReaderIndex({
+      currentIndex: pageIndex,
+      pageCount: pages.length,
+      direction: "next",
+      isSinglePage
+    });
+
+    return nextIndex === pageIndex ? null : pages[nextIndex]?.imageUrl ?? null;
+  }, [isSinglePage, pageIndex, pages]);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +106,15 @@ export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
       )
     );
   }, [pages.length]);
+
+  useEffect(() => {
+    if (!nextImageUrl || typeof window === "undefined") {
+      return;
+    }
+
+    const image = new window.Image();
+    image.src = nextImageUrl;
+  }, [nextImageUrl]);
 
   function go(direction: "first" | "previous" | "next" | "last") {
     const nextIndex = getNextReaderIndex({
@@ -355,11 +374,7 @@ function ReaderPaper({
           style={getImageStyle(page)}
         >
           {page.imageUrl ? (
-            <img
-              alt=""
-              className="h-full w-full object-contain shadow-[0_10px_32px_rgba(72,66,56,0.2)]"
-              src={page.imageUrl}
-            />
+            <ReaderImage src={page.imageUrl} />
           ) : (
             <span className="text-xs uppercase text-ink/35">
               Annual Album
@@ -368,6 +383,38 @@ function ReaderPaper({
         </div>
       )}
     </article>
+  );
+}
+
+function ReaderImage({ src }: { src: string }) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+    "loading"
+  );
+
+  useEffect(() => {
+    setStatus("loading");
+  }, [src]);
+
+  return (
+    <>
+      {status !== "loaded" ? (
+        <div className="absolute inset-5 grid place-items-center bg-[#efe8dc] text-xs uppercase tracking-normal text-ink/35 md:inset-8">
+          {status === "error" ? "Image unavailable" : "Loading"}
+        </div>
+      ) : null}
+      <img
+        key={src}
+        alt=""
+        className={
+          status === "loaded"
+            ? "h-full w-full object-contain opacity-100 shadow-[0_10px_32px_rgba(72,66,56,0.2)] transition-opacity duration-200"
+            : "h-full w-full object-contain opacity-0 shadow-[0_10px_32px_rgba(72,66,56,0.2)]"
+        }
+        src={src}
+        onError={() => setStatus("error")}
+        onLoad={() => setStatus("loaded")}
+      />
+    </>
   );
 }
 

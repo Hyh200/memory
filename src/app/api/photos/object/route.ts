@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     return new Response(body.buffer as ArrayBuffer, {
       headers: {
-        "Cache-Control": "private, max-age=3600",
+        "Cache-Control": "private, max-age=31536000, immutable",
         "Content-Type": object.contentType
       }
     });

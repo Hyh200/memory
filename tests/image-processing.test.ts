@@ -30,6 +30,10 @@ test("processImageUpload creates a display thumbnail and falls back to modified 
   assert.match(result.thumbnailDataUrl, /^data:image\/webp;base64,/);
   assert.equal(result.thumbnailWidth, 360);
   assert.equal(result.thumbnailHeight, 360);
+  assert.equal(result.displayMimeType, "image/webp");
+  assert.ok(Buffer.isBuffer(result.displayBuffer));
+  assert.equal(result.displayWidth, 800);
+  assert.equal(result.displayHeight, 600);
   assert.equal(result.width, 800);
   assert.equal(result.height, 600);
   assert.equal(result.orientation, "landscape");

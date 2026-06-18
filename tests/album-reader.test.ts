@@ -30,6 +30,21 @@ test("createReaderPages keeps only the cover when no archived photos exist", () 
   assert.equal(pages[0].kind, "cover");
 });
 
+test("createReaderPages prefers display images when available", () => {
+  const pages = createReaderPages(createSeedAlbum(2026), [
+    {
+      ...createArchivedPhoto("uploaded_display", 2026),
+      displayObjectKey:
+        "users/user_hao/years/2026/uploaded_display/display/display.webp"
+    }
+  ]);
+
+  assert.equal(
+    pages[1].imageUrl,
+    "/api/photos/object?key=users%2Fuser_hao%2Fyears%2F2026%2Fuploaded_display%2Fdisplay%2Fdisplay.webp"
+  );
+});
+
 test("reader navigation uses single-page and double-page steps", () => {
   assert.equal(getReaderStep(true), 1);
   assert.equal(getReaderStep(false), 2);

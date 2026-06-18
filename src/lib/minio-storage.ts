@@ -20,6 +20,7 @@ export type StoredPhotoObjects = {
   bucket: string;
   originalObjectKey: string;
   thumbnailObjectKey: string;
+  displayObjectKey: string;
 };
 
 export type StoreProcessedPhotoInput = {
@@ -27,6 +28,8 @@ export type StoreProcessedPhotoInput = {
   originalMimeType: string;
   thumbnailBuffer: Buffer;
   thumbnailMimeType: string;
+  displayBuffer: Buffer;
+  displayMimeType: string;
   ownerId: string;
   resolvedYear: number;
   fileName: string;
@@ -37,6 +40,8 @@ export async function storeProcessedPhoto({
   originalMimeType,
   thumbnailBuffer,
   thumbnailMimeType,
+  displayBuffer,
+  displayMimeType,
   ownerId,
   resolvedYear,
   fileName
@@ -55,6 +60,7 @@ export async function storeProcessedPhoto({
   ].join("/");
   const originalObjectKey = `${baseKey}/original/${sanitizeFileName(fileName)}`;
   const thumbnailObjectKey = `${baseKey}/thumb/thumbnail.webp`;
+  const displayObjectKey = `${baseKey}/display/display.webp`;
 
   await Promise.all([
     client.send(
@@ -72,6 +78,14 @@ export async function storeProcessedPhoto({
         Body: thumbnailBuffer,
         ContentType: thumbnailMimeType
       })
+    ),
+    client.send(
+      new PutObjectCommand({
+        Bucket: config.bucket,
+        Key: displayObjectKey,
+        Body: displayBuffer,
+        ContentType: displayMimeType
+      })
     )
   ]);
 
@@ -79,7 +93,8 @@ export async function storeProcessedPhoto({
     photoId,
     bucket: config.bucket,
     originalObjectKey,
-    thumbnailObjectKey
+    thumbnailObjectKey,
+    displayObjectKey
   };
 }
 
