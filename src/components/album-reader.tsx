@@ -37,6 +37,13 @@ type ShareState = {
   revokedAt: string | null;
 };
 
+const maxMemoryCachedImages = 16;
+const memoryImageCache = new Map<
+  string,
+  { objectUrl: string; lastUsed: number }
+>();
+const pendingImageLoads = new Map<string, Promise<string>>();
+
 export function AlbumReader({ albumYear, canShare = true }: AlbumReaderProps) {
   const [archivedPhotos, setArchivedPhotos] = useState<ArchivedPhoto[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -405,9 +412,38 @@ function ReaderImage({
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   );
+  const [displaySrc, setDisplaySrc] = useState<string | null>(() =>
+    getCachedImageObjectUrl(src)
+  );
 
   useEffect(() => {
+    let cancelled = false;
+    const cachedSrc = getCachedImageObjectUrl(src);
+
     setStatus("loading");
+    setDisplaySrc(cachedSrc);
+
+    if (cachedSrc) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    loadImageIntoMemoryCache(src)
+      .then((objectUrl) => {
+        if (!cancelled) {
+          setDisplaySrc(objectUrl);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setStatus("error");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [src]);
 
   return (
@@ -417,21 +453,23 @@ function ReaderImage({
           {status === "error" ? "Image unavailable" : "Loading"}
         </div>
       ) : null}
-      <img
-        key={src}
-        alt=""
-        className={
-          status === "loaded"
-            ? "h-full w-full object-contain opacity-100 shadow-[0_10px_32px_rgba(72,66,56,0.2)] transition-opacity duration-200"
-            : "h-full w-full object-contain opacity-0 shadow-[0_10px_32px_rgba(72,66,56,0.2)]"
-        }
-        src={src}
-        onError={() => setStatus("error")}
-        onLoad={() => {
-          setStatus("loaded");
-          onLoad(src);
-        }}
-      />
+      {displaySrc ? (
+        <img
+          key={displaySrc}
+          alt=""
+          className={
+            status === "loaded"
+              ? "h-full w-full object-contain opacity-100 shadow-[0_10px_32px_rgba(72,66,56,0.2)] transition-opacity duration-200"
+              : "h-full w-full object-contain opacity-0 shadow-[0_10px_32px_rgba(72,66,56,0.2)]"
+          }
+          src={displaySrc}
+          onError={() => setStatus("error")}
+          onLoad={() => {
+            setStatus("loaded");
+            onLoad(src);
+          }}
+        />
+      ) : null}
     </>
   );
 }
@@ -443,20 +481,81 @@ function ImagePreloader({
   enabled: boolean;
   urls: string[];
 }) {
-  if (!enabled || urls.length === 0) {
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    urls.forEach((url) => {
+      void loadImageIntoMemoryCache(url).catch(() => undefined);
+    });
+  }, [enabled, urls]);
+
+  return null;
+}
+
+function getCachedImageObjectUrl(src: string) {
+  const cached = memoryImageCache.get(src);
+
+  if (!cached) {
     return null;
   }
 
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed -bottom-4 -right-4 h-px w-px overflow-hidden opacity-0"
-    >
-      {urls.map((url) => (
-        <img alt="" key={url} src={url} />
-      ))}
-    </div>
+  cached.lastUsed = Date.now();
+  return cached.objectUrl;
+}
+
+async function loadImageIntoMemoryCache(src: string) {
+  const cached = getCachedImageObjectUrl(src);
+
+  if (cached) {
+    return cached;
+  }
+
+  const pending = pendingImageLoads.get(src);
+
+  if (pending) {
+    return pending;
+  }
+
+  const promise = fetch(src, { cache: "force-cache" })
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to load image: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      memoryImageCache.set(src, { objectUrl, lastUsed: Date.now() });
+      trimMemoryImageCache();
+
+      return objectUrl;
+    })
+    .finally(() => {
+      pendingImageLoads.delete(src);
+    });
+
+  pendingImageLoads.set(src, promise);
+  return promise;
+}
+
+function trimMemoryImageCache() {
+  if (memoryImageCache.size <= maxMemoryCachedImages) {
+    return;
+  }
+
+  const expired = Array.from(memoryImageCache.entries()).sort(
+    (left, right) => left[1].lastUsed - right[1].lastUsed
   );
+
+  for (const [src, cached] of expired) {
+    if (memoryImageCache.size <= maxMemoryCachedImages) {
+      break;
+    }
+
+    URL.revokeObjectURL(cached.objectUrl);
+    memoryImageCache.delete(src);
+  }
 }
 
 function getPaperStyle(page: ReaderPage): CSSProperties {
